@@ -14,20 +14,20 @@ function makeDemoTasks(): Task[] {
   const today = todayStr();
   const make = (
     id: string, title: string, mins: number, priority: Priority,
-    projectId: string | null, notes = '', startTime?: string,
+    contextId: string | null, notes = '', startTime?: string,
   ): Task => ({
     id, title, notes, estimatedMinutes: mins, actualMinutes: null,
     priority, status: startTime ? 'scheduled' : 'inbox',
-    projectId, scheduledDate: startTime ? today : null,
+    contextId, scheduledDate: startTime ? today : null,
     startTime: startTime ?? null, endTime: startTime ? addMinutes(startTime, mins) : null,
     completedAt: null, createdAt: now, updatedAt: now,
   });
   return [
-    make('demo-1', 'Review pull request', 45, 'high', 'proj-work', 'Review the auth refactor PR', '09:00'),
-    make('demo-2', 'Study machine learning', 90, 'medium', 'proj-learning', 'Chapter 4: Neural Networks', '10:00'),
-    make('demo-3', 'Workout', 60, 'medium', 'proj-personal', 'Upper body + cardio', '07:00'),
-    make('demo-4', 'Grocery shopping', 30, 'low', 'proj-personal'),
-    make('demo-5', 'Reply to emails', 30, 'medium', 'proj-work', 'Clear inbox from last 2 days'),
+    make('demo-1', 'Review pull request', 45, 'high', 'ctx-work', 'Review the auth refactor PR', '09:00'),
+    make('demo-2', 'Study machine learning', 90, 'medium', 'ctx-personal', 'Chapter 4: Neural Networks', '10:00'),
+    make('demo-3', 'Workout', 60, 'medium', 'ctx-personal', 'Upper body + cardio', '07:00'),
+    make('demo-4', 'Grocery shopping', 30, 'low', 'ctx-personal'),
+    make('demo-5', 'Reply to emails', 30, 'medium', 'ctx-work', 'Clear inbox from last 2 days'),
   ];
 }
 
@@ -112,7 +112,7 @@ export const useTaskStore = create<TaskState>()(
           actualMinutes: null,
           priority: partial.priority ?? 'medium',
           status: partial.status ?? 'inbox',
-          projectId: partial.projectId ?? null,
+          contextId: partial.contextId ?? null,
           scheduledDate: partial.scheduledDate ?? null,
           startTime: partial.startTime ?? null,
           endTime: partial.endTime ?? null,

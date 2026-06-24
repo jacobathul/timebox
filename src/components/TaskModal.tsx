@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Clock, Calendar, Trash2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
-import { ProjectSelector } from './ProjectSelector';
+import { ContextSelector } from './contexts/ContextSelector';
 import type { Task, Priority } from '../types';
 
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
@@ -24,7 +24,7 @@ export function TaskModal() {
     if (isTaskModalOpen) {
       setForm(taskModalInitial ?? {
         title: '', notes: '', estimatedMinutes: 30, priority: 'medium',
-        projectId: null, scheduledDate: null, startTime: null, endTime: null,
+        contextId: null, scheduledDate: null, startTime: null, endTime: null,
       });
     }
   }, [isTaskModalOpen, taskModalInitial]);
@@ -124,7 +124,7 @@ export function TaskModal() {
 
           <div>
             <label className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-2 block">Project</label>
-            <ProjectSelector value={form.projectId ?? null} onChange={(id) => set('projectId', id)} />
+            <ContextSelector value={form.contextId ?? null} onChange={(id) => set('contextId', id)} />
           </div>
 
           {form.scheduledDate && (

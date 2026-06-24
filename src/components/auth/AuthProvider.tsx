@@ -2,13 +2,9 @@ import { useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useTaskStore } from '../../store/useTaskStore';
-import { useProjectStore } from '../../store/useProjectStore';
+import { useContextStore } from '../../store/useContextStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
-/**
- * Subscribes to Supabase auth state changes and keeps the store in sync.
- * Must be rendered once near the top of the component tree.
- */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -21,23 +17,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         _setInitialized();
 
         if (session?.user) {
-          // Fetch cloud data (replaces local/demo data)
           await Promise.all([
             useTaskStore.getState().fetchTasks(),
             useTaskStore.getState().fetchReviews(),
-            useProjectStore.getState().fetchProjects(),
+            useContextStore.getState().fetchContexts(),
             useSettingsStore.getState().fetchSettings(),
           ]);
           await refreshProfile();
           _setProfile(useAuthStore.getState().profile);
         } else {
-          // Clear cloud data; local/demo data remains in Zustand
           useTaskStore.getState().clearData();
-          useProjectStore.getState().clearProjects();
+          useContextStore.getState().clearContexts();
         }
       },
     );
-
     return () => subscription.unsubscribe();
   }, []);
 

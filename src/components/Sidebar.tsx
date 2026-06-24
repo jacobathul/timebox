@@ -1,5 +1,5 @@
 import type React from 'react';
-import { CalendarDays, LayoutGrid, PlayCircle, Moon, Plus, Settings, LogOut } from 'lucide-react';
+import { CalendarDays, LayoutGrid, PlayCircle, Moon, Plus, Settings, LogOut, FolderTree } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
@@ -76,12 +76,21 @@ export function Sidebar() {
 
       <div className="px-3 mb-1 space-y-0.5">
         <button
-          onClick={() => navigate('/app/settings/account')}
+          onClick={() => navigate('/app/settings/contexts')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-            pathname.startsWith('/app/settings') ? 'bg-accent-50 text-accent-700 font-medium' : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
+            pathname === '/app/settings/contexts' ? 'bg-accent-50 text-accent-700 font-medium' : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
           }`}
         >
-          <Settings size={16} className={pathname.startsWith('/app/settings') ? 'text-accent-500' : 'text-stone-400'} />
+          <FolderTree size={16} className={pathname === '/app/settings/contexts' ? 'text-accent-500' : 'text-stone-400'} />
+          Contexts
+        </button>
+        <button
+          onClick={() => navigate('/app/settings/account')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+            pathname === '/app/settings/account' ? 'bg-accent-50 text-accent-700 font-medium' : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
+          }`}
+        >
+          <Settings size={16} className={pathname === '/app/settings/account' ? 'text-accent-500' : 'text-stone-400'} />
           Settings
         </button>
         {user && (

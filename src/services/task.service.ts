@@ -11,7 +11,7 @@ function dbToTask(db: DbTask): Task {
     actualMinutes: db.actual_minutes,
     priority: db.priority,
     status: db.status === 'archived' ? 'completed' : db.status,
-    projectId: db.project_id,
+    contextId: db.context_id ?? db.project_id, // fallback for rows not yet migrated
     scheduledDate: db.scheduled_date,
     startTime: db.start_time,
     endTime: db.end_time,
@@ -25,7 +25,8 @@ function taskToInsert(task: Task, userId: string) {
   return {
     id: task.id,
     user_id: userId,
-    project_id: task.projectId,
+    project_id: task.contextId,
+    context_id: task.contextId,
     title: task.title,
     notes: task.notes,
     estimated_minutes: task.estimatedMinutes,
@@ -69,7 +70,7 @@ export const taskService = {
     if (updates.actualMinutes !== undefined)  patch.actual_minutes = updates.actualMinutes;
     if (updates.priority !== undefined)       patch.priority = updates.priority;
     if (updates.status !== undefined)         patch.status = updates.status;
-    if (updates.projectId !== undefined)      patch.project_id = updates.projectId;
+    if (updates.contextId !== undefined)      { patch.context_id = updates.contextId; patch.project_id = updates.contextId; }
     if (updates.scheduledDate !== undefined)  patch.scheduled_date = updates.scheduledDate;
     if (updates.startTime !== undefined)      patch.start_time = updates.startTime;
     if (updates.endTime !== undefined)        patch.end_time = updates.endTime;

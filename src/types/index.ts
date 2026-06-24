@@ -10,7 +10,7 @@ export interface Task {
   actualMinutes: number | null;
   priority: Priority;
   status: TaskStatus;
-  projectId: string | null;
+  contextId: string | null;
   scheduledDate: string | null; // ISO date string "YYYY-MM-DD"
   startTime: string | null;     // "HH:MM" in 24h
   endTime: string | null;       // "HH:MM" in 24h
@@ -23,6 +23,21 @@ export interface Project {
   id: string;
   name: string;
   color: string;
+}
+
+export interface ProjectContext {
+  id: string;
+  user_id: string;
+  parent_context_id: string | null;
+  name: string;
+  color: string;
+  depth: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContextTreeNode extends ProjectContext {
+  children: ContextTreeNode[];
 }
 
 export interface DailyReview {
