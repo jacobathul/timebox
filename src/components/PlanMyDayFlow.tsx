@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Circle, ArrowRight, ArrowLeft, Sparkles, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '../store/useTaskStore';
-import { useStore } from '../store/useStore';
 import { todayStr, formatDuration } from '../utils/time';
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -16,7 +16,7 @@ const STEPS = [
 
 export function PlanMyDayFlow() {
   const { tasks, scheduleTask, updateTask } = useTaskStore();
-  const { setView } = useStore();
+  const navigate = useNavigate();
   const today = todayStr();
 
   const [step, setStep] = useState<Step>(1);
@@ -214,7 +214,7 @@ export function PlanMyDayFlow() {
               </div>
               <h2 className="text-xl font-semibold text-stone-800 mb-2">You're all set!</h2>
               <p className="text-sm text-stone-400 mb-6">Your day is planned. {selectedIds.size} task{selectedIds.size !== 1 ? 's' : ''} scheduled for today.</p>
-              <button onClick={() => setView('daily')} className="px-6 py-2.5 rounded-xl bg-accent-500 text-white text-sm font-semibold hover:bg-accent-600 transition-colors shadow-sm">
+              <button onClick={() => navigate('/app/today')} className="px-6 py-2.5 rounded-xl bg-accent-500 text-white text-sm font-semibold hover:bg-accent-600 transition-colors shadow-sm">
                 Open Daily Planner
               </button>
             </div>

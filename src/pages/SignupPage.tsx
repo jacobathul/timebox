@@ -5,6 +5,6 @@ import { useAuthStore } from '../store/useAuthStore';
 
 export function SignupPage() {
   const { user, initialized } = useAuthStore();
-  if (initialized && user) return <Navigate to="/app" replace />;
+  if (initialized && user) return <Navigate to="/app/today" replace />;
   return <AuthLayout title="Create your account" subtitle="Start planning your days with FlowDay"><SignupForm /></AuthLayout>;
 }

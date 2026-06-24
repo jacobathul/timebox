@@ -1,24 +1,24 @@
-import React from 'react';
+import type React from 'react';
 import { CalendarDays, LayoutGrid, PlayCircle, Moon, Plus, Settings, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { useAuthStore } from '../store/useAuthStore';
-import type { AppView } from '../types';
 import { formatDate, todayStr } from '../utils/time';
 
-const NAV_ITEMS: { view: AppView; label: string; icon: React.ReactNode; shortcut?: string }[] = [
-  { view: 'daily',  label: 'Today',       icon: <CalendarDays size={18} />, shortcut: 'D' },
-  { view: 'weekly', label: 'Week',        icon: <LayoutGrid size={18} /> },
-  { view: 'plan',   label: 'Plan My Day', icon: <PlayCircle size={18} />,  shortcut: 'P' },
-  { view: 'review', label: 'End of Day',  icon: <Moon size={18} />,        shortcut: 'R' },
+const NAV_ITEMS: { path: string; label: string; icon: React.ReactNode; shortcut?: string }[] = [
+  { path: '/app/today',  label: 'Today',       icon: <CalendarDays size={18} />, shortcut: 'D' },
+  { path: '/app/week',   label: 'Week',        icon: <LayoutGrid size={18} /> },
+  { path: '/app/plan',   label: 'Plan My Day', icon: <PlayCircle size={18} />,  shortcut: 'P' },
+  { path: '/app/review', label: 'End of Day',  icon: <Moon size={18} />,        shortcut: 'R' },
 ];
 
 export function Sidebar() {
-  const { currentView, setView, openTaskModal } = useStore();
+  const { openTaskModal } = useStore();
   const { tasks } = useTaskStore();
   const { user, profile, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const inboxCount = tasks.filter((t) => t.status === 'inbox').length;
   const today = todayStr();
@@ -51,34 +51,37 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
-        {NAV_ITEMS.map(({ view, label, icon, shortcut }) => (
-          <button
-            key={view}
-            onClick={() => setView(view)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-              currentView === view
-                ? 'bg-accent-50 text-accent-700 font-medium'
-                : 'text-stone-600 hover:bg-stone-50 hover:text-stone-800'
-            }`}
-          >
-            <span className={currentView === view ? 'text-accent-500' : 'text-stone-400'}>{icon}</span>
-            {label}
-            {view === 'daily' && inboxCount > 0 && (
-              <span className="ml-auto bg-accent-100 text-accent-600 text-xs font-semibold rounded-full px-2 py-0.5">{inboxCount}</span>
-            )}
-            {shortcut && currentView !== view && (
-              <span className="ml-auto text-stone-300 text-xs">{shortcut}</span>
-            )}
-          </button>
-        ))}
+        {NAV_ITEMS.map(({ path, label, icon, shortcut }) => {
+          const active = pathname === path || pathname.startsWith(path + '/');
+          return (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                active ? 'bg-accent-50 text-accent-700 font-medium' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-800'
+              }`}
+            >
+              <span className={active ? 'text-accent-500' : 'text-stone-400'}>{icon}</span>
+              {label}
+              {path === '/app/today' && inboxCount > 0 && (
+                <span className="ml-auto bg-accent-100 text-accent-600 text-xs font-semibold rounded-full px-2 py-0.5">{inboxCount}</span>
+              )}
+              {shortcut && !active && (
+                <span className="ml-auto text-stone-300 text-xs">{shortcut}</span>
+              )}
+            </button>
+          );
+        })}
       </nav>
 
       <div className="px-3 mb-1 space-y-0.5">
         <button
-          onClick={() => navigate('/app/settings')}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors"
+          onClick={() => navigate('/app/settings/account')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+            pathname.startsWith('/app/settings') ? 'bg-accent-50 text-accent-700 font-medium' : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
+          }`}
         >
-          <Settings size={16} className="text-stone-400" />
+          <Settings size={16} className={pathname.startsWith('/app/settings') ? 'text-accent-500' : 'text-stone-400'} />
           Settings
         </button>
         {user && (

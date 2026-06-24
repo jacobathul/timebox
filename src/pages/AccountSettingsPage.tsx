@@ -7,7 +7,7 @@ export function AccountSettingsPage() {
     <div className="min-h-screen bg-surface-50">
       <div className="border-b border-stone-200 bg-white px-6 py-3 flex items-center gap-3">
         <Link
-          to="/app"
+          to="/app/today"
           className="flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-600 transition-colors"
         >
           <ArrowLeft size={15} />

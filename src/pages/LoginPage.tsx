@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/useAuthStore';
 
 export function LoginPage() {
   const { user, initialized } = useAuthStore();
-  if (initialized && user) return <Navigate to="/app" replace />;
+  if (initialized && user) return <Navigate to="/app/today" replace />;
 
   return <AuthLayout title="Welcome back" subtitle="Sign in to your FlowDay account"><LoginForm /></AuthLayout>;
 }

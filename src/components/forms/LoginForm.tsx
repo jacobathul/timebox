@@ -20,7 +20,7 @@ export function LoginForm() {
       setError('Invalid email or password. Please try again.');
       return;
     }
-    navigate('/app');
+    navigate('/app/today');
   }
 
   return (

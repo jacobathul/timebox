@@ -30,7 +30,7 @@ export function ResetPasswordForm() {
     const { error: err } = await updatePassword(password);
     if (err) { setError('Failed to reset password. The link may have expired.'); return; }
     setDone(true);
-    setTimeout(() => navigate('/app'), 2500);
+    setTimeout(() => navigate('/app/today'), 2500);
   }
 
   if (done) {

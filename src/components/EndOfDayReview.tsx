@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Moon, CheckCircle2, Clock, RotateCcw, TrendingUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '../store/useTaskStore';
-import { useStore } from '../store/useStore';
 import { todayStr, formatDateFull, formatDuration } from '../utils/time';
 import type { DailyReview } from '../types';
 
 export function EndOfDayReview() {
   const { tasks, saveReview, getReview, rollTaskToTomorrow } = useTaskStore();
-  const { setView } = useStore();
+  const navigate = useNavigate();
   const today = todayStr();
 
   const existingReview = getReview(today);
@@ -141,7 +141,7 @@ export function EndOfDayReview() {
           </div>
 
           <div className="flex items-center justify-between">
-            <button onClick={() => setView('daily')} className="text-sm text-stone-400 hover:text-stone-600 transition-colors">
+            <button onClick={() => navigate('/app/today')} className="text-sm text-stone-400 hover:text-stone-600 transition-colors">
               Back to planner
             </button>
             <button

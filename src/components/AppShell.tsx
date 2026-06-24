@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { DailyPlanner } from './DailyPlanner';
 import { PlanMyDayFlow } from './PlanMyDayFlow';
@@ -9,22 +9,9 @@ import { TaskModal } from './TaskModal';
 import { MigrationDialog } from './MigrationDialog';
 import { ToastContainer } from './ui/Toast';
 import { OfflineBanner } from './ui/OfflineBanner';
-import { useStore } from '../store/useStore';
 import { collectMigratableTasks } from '../services/migration.service';
 import { useAuthStore } from '../store/useAuthStore';
 import { AccountSettingsPage } from '../pages/AccountSettingsPage';
-
-function MainContent() {
-  const { currentView } = useStore();
-  return (
-    <main className="flex-1 flex overflow-hidden">
-      {currentView === 'daily' && <DailyPlanner />}
-      {currentView === 'weekly' && <WeeklyView />}
-      {currentView === 'plan' && <PlanMyDayFlow />}
-      {currentView === 'review' && <EndOfDayReview />}
-    </main>
-  );
-}
 
 export function AppShell() {
   const { user } = useAuthStore();
@@ -47,8 +34,13 @@ export function AppShell() {
 
         <div className="flex-1 flex overflow-hidden">
           <Routes>
-            <Route path="settings" element={<AccountSettingsPage />} />
-            <Route path="*" element={<MainContent />} />
+            <Route path="today"             element={<DailyPlanner />} />
+            <Route path="week"              element={<WeeklyView />} />
+            <Route path="plan"              element={<PlanMyDayFlow />} />
+            <Route path="review"            element={<EndOfDayReview />} />
+            <Route path="settings/account"  element={<AccountSettingsPage />} />
+            <Route path="settings"          element={<Navigate to="account" replace />} />
+            <Route path="*"                 element={<Navigate to="today" replace />} />
           </Routes>
         </div>
 
