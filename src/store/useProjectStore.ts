@@ -96,7 +96,7 @@ export const useProjectStore = create<ProjectState>()(
       },
     }),
     {
-      name: 'flowday-projects',
+      name: 'timebox-projects',
       partialize: (s) => ({ projects: s.projects }),
     },
   ),

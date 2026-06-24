@@ -6,7 +6,7 @@ export function LoginPage() {
   const { user, initialized } = useAuthStore();
   if (initialized && user) return <Navigate to="/app/today" replace />;
 
-  return <AuthLayout title="Welcome back" subtitle="Sign in to your FlowDay account"><LoginForm /></AuthLayout>;
+  return <AuthLayout title="Welcome back" subtitle="Sign in to your Timebox account"><LoginForm /></AuthLayout>;
 }
 
 function AuthLayout({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
@@ -18,7 +18,7 @@ function AuthLayout({ title, subtitle, children }: { title: string; subtitle: st
           <div className="w-9 h-9 rounded-xl bg-accent-500 flex items-center justify-center shadow-sm">
             <span className="text-white text-lg font-bold">F</span>
           </div>
-          <span className="font-semibold text-stone-800 text-xl tracking-tight">FlowDay</span>
+          <span className="font-semibold text-stone-800 text-xl tracking-tight">Timebox</span>
         </div>
 
         <div className="bg-white rounded-2xl shadow-card border border-stone-200 p-6">

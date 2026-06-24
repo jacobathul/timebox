@@ -25,7 +25,7 @@ export function getLocalGuestData(): { tasks: Task[]; projects: Project[] } | nu
 /** Also checks the new per-store localStorage key for tasks created as a guest */
 export function getNewFormatGuestTasks(): Task[] {
   try {
-    const raw = localStorage.getItem('flowday-tasks');
+    const raw = localStorage.getItem('timebox-tasks');
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     const tasks: Task[] = parsed?.state?.tasks ?? [];
@@ -49,8 +49,8 @@ export function collectMigratableTasks(): Task[] {
 
 export function clearGuestStorage(): void {
   localStorage.removeItem(OLD_STORAGE_KEY);
-  localStorage.removeItem('flowday-tasks');
-  localStorage.removeItem('flowday-projects');
+  localStorage.removeItem('timebox-tasks');
+  localStorage.removeItem('timebox-projects');
 }
 
 /**
@@ -59,7 +59,7 @@ export function clearGuestStorage(): void {
  * Safe to call multiple times (no-ops after the first run).
  */
 export function shimOldStorageToNewKeys(): void {
-  const DONE_KEY = 'flowday-migrated-v2';
+  const DONE_KEY = 'timebox-migrated-v2';
   if (localStorage.getItem(DONE_KEY)) return;
 
   try {
@@ -67,14 +67,14 @@ export function shimOldStorageToNewKeys(): void {
     if (raw) {
       const { state } = JSON.parse(raw) as { state: { tasks?: Task[]; projects?: Project[]; reviews?: unknown[] } };
 
-      if (state?.tasks && !localStorage.getItem('flowday-tasks')) {
-        localStorage.setItem('flowday-tasks', JSON.stringify({
+      if (state?.tasks && !localStorage.getItem('timebox-tasks')) {
+        localStorage.setItem('timebox-tasks', JSON.stringify({
           state: { tasks: state.tasks, reviews: state.reviews ?? [] },
           version: 0,
         }));
       }
-      if (state?.projects && !localStorage.getItem('flowday-projects')) {
-        localStorage.setItem('flowday-projects', JSON.stringify({
+      if (state?.projects && !localStorage.getItem('timebox-projects')) {
+        localStorage.setItem('timebox-projects', JSON.stringify({
           state: { projects: state.projects },
           version: 0,
         }));

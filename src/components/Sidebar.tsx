@@ -34,7 +34,7 @@ export function Sidebar() {
           <div className="w-7 h-7 rounded-lg bg-accent-500 flex items-center justify-center">
             <span className="text-white text-sm font-bold">F</span>
           </div>
-          <span className="font-semibold text-stone-800 tracking-tight text-lg">FlowDay</span>
+          <span className="font-semibold text-stone-800 tracking-tight text-lg">Timebox</span>
         </div>
         <p className="text-xs text-stone-400 mt-1">{todayLabel}</p>
       </div>

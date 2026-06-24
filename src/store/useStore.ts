@@ -35,7 +35,7 @@ export const useStore = create<UIState>()(
       setActiveTask: (id) => set({ activeTaskId: id }),
     }),
     {
-      name: 'flowday-ui',
+      name: 'timebox-ui',
       partialize: (s) => ({ currentView: s.currentView, selectedDate: s.selectedDate }),
     },
   ),

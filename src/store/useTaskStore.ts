@@ -232,7 +232,7 @@ export const useTaskStore = create<TaskState>()(
       getReview: (date) => get().reviews.find((r) => r.date === date),
     }),
     {
-      name: 'flowday-tasks',
+      name: 'timebox-tasks',
       partialize: (s) => ({ tasks: s.tasks, reviews: s.reviews }),
     },
   ),
