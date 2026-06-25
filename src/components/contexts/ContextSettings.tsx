@@ -1,25 +1,29 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
-import { useContextStore } from '../../store/useContextStore';
+import { useContextStore, buildContextTree, flattenContextTree } from '../../store/useContextStore';
 import { useTaskStore } from '../../store/useTaskStore';
 import { ContextTreeItem, DeleteContextWarning } from './ContextTreeItem';
 import { ContextFormDialog } from './ContextFormDialog';
 import type { ProjectContext } from '../../types';
 
 export function ContextSettings() {
-  const { getTree, getFlat, addContext, updateContext, deleteContext, getChildCount } = useContextStore();
-  const { tasks } = useTaskStore();
+  const contexts = useContextStore((s) => s.contexts);
+  const addContext = useContextStore((s) => s.addContext);
+  const updateContext = useContextStore((s) => s.updateContext);
+  const deleteContext = useContextStore((s) => s.deleteContext);
+  const getChildCount = useContextStore((s) => s.getChildCount);
+  const tasks = useTaskStore((s) => s.tasks);
   const [showCreateRoot, setShowCreateRoot] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<ProjectContext | null>(null);
 
-  const tree = getTree();
-  const flat = getFlat();
+  const tree = useMemo(() => buildContextTree(contexts), [contexts]);
+  const flat = useMemo(() => flattenContextTree(tree), [tree]);
 
-  // Build a map of contextId → task count for efficient lookup
-  const taskCountMap: Record<string, number> = {};
-  flat.forEach((ctx) => {
-    taskCountMap[ctx.id] = tasks.filter((t) => t.contextId === ctx.id).length;
-  });
+  const taskCountMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    flat.forEach((ctx) => { map[ctx.id] = tasks.filter((t) => t.contextId === ctx.id).length; });
+    return map;
+  }, [flat, tasks]);
 
   function handleAdd(parentId: string, name: string, color: string) {
     addContext(name, color, parentId);

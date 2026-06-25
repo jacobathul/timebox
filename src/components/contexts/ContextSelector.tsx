@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, X, Plus } from 'lucide-react';
-import { useContextStore } from '../../store/useContextStore';
+import { useContextStore, buildContextTree, flattenContextTree } from '../../store/useContextStore';
 import { ContextFormDialog } from './ContextFormDialog';
 
 interface Props {
@@ -11,18 +11,24 @@ interface Props {
 }
 
 export function ContextSelector({ value, onChange, placeholder = 'No context', className = '' }: Props) {
-  const { getFlat, getById, addContext } = useContextStore();
+  // Subscribe to contexts directly so the component re-renders when contexts change
+  const contexts = useContextStore((s) => s.contexts);
+  const addContext = useContextStore((s) => s.addContext);
+
   const [open, setOpen] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [query, setQuery] = useState('');
   const ref = useRef<HTMLDivElement>(null);
 
-  const flat = getFlat();
-  const selected = value ? getById(value) : null;
+  const flat = useMemo(() => flattenContextTree(buildContextTree(contexts)), [contexts]);
+  const selected = useMemo(() => (value ? contexts.find((c) => c.id === value) : undefined), [value, contexts]);
 
-  const filtered = query.trim()
-    ? flat.filter((c) => c.name.toLowerCase().includes(query.toLowerCase()) || c.path.toLowerCase().includes(query.toLowerCase()))
-    : flat;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q
+      ? flat.filter((c) => c.name.toLowerCase().includes(q) || c.path.toLowerCase().includes(q))
+      : flat;
+  }, [flat, query]);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -106,7 +112,7 @@ export function ContextSelector({ value, onChange, placeholder = 'No context', c
             ))}
 
             {filtered.length === 0 && (
-              <p className="px-3 py-3 text-xs text-stone-400 text-center">No matching contexts</p>
+              <p className="px-3 py-3 text-xs text-stone-400 text-center">No contexts yet — create one below</p>
             )}
           </div>
 
