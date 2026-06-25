@@ -22,23 +22,24 @@ function dbToTask(db: DbTask): Task {
 }
 
 function taskToInsert(task: Task, userId: string) {
-  return {
-    id: task.id,
+  const insert: Record<string, any> = {
     user_id: userId,
-    project_id: task.contextId,
-    context_id: task.contextId,
     title: task.title,
     notes: task.notes,
     estimated_minutes: task.estimatedMinutes,
-    actual_minutes: task.actualMinutes,
-    priority: task.priority,
-    status: task.status,
-    scheduled_date: task.scheduledDate,
-    start_time: task.startTime,
-    end_time: task.endTime,
-    completed_at: task.completedAt,
-  };
-}
+      priority: task.priority,
+      status: task.status,
+      actual_minutes: null,
+      context_id: task.contextId,
+      project_id: task.contextId,
+      scheduled_date: task.scheduledDate,
+      start_time: task.startTime,
+      end_time: task.endTime,
+      completed_at: task.completedAt,
+    };
+    
+    return insert;
+  }
 
 export const taskService = {
   async fetchAll(userId: string): Promise<Task[]> {

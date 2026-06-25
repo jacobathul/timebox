@@ -14,13 +14,15 @@ export const PRESET_COLORS = [
   '#ec4899', '#6b7280',
 ];
 
+function getUserId(): string | null { return useAuthStore.getState().user?.id ?? null; }
+function toast() { return useToastStore.getState(); }
+
+// Default contexts are only for UI display when offline or loading.
+// Never persisted to localStorage or sent to DB.
 const DEFAULT_CONTEXTS: ProjectContext[] = [
   { id: 'ctx-work',     user_id: '', parent_context_id: null, name: 'Work',     color: '#3b82f6', depth: 1, created_at: '', updated_at: '' },
   { id: 'ctx-personal', user_id: '', parent_context_id: null, name: 'Personal', color: '#22c55e', depth: 1, created_at: '', updated_at: '' },
 ];
-
-function getUserId(): string | null { return useAuthStore.getState().user?.id ?? null; }
-function toast() { return useToastStore.getState(); }
 
 // Build a tree from a flat list
 export function buildContextTree(contexts: ProjectContext[]): ContextTreeNode[] {
@@ -90,7 +92,7 @@ interface ContextState {
 export const useContextStore = create<ContextState>()(
   persist(
     (set, get) => ({
-      contexts: DEFAULT_CONTEXTS,
+      contexts: [],
       loading: false,
 
       fetchContexts: async () => {
@@ -116,7 +118,7 @@ export const useContextStore = create<ContextState>()(
         }
       },
 
-      clearContexts: () => set({ contexts: DEFAULT_CONTEXTS }),
+      clearContexts: () => set({ contexts: [] }),
 
       addContext: (name, color, parentId = null) => {
         const uid = getUserId();
@@ -205,12 +207,15 @@ export const useContextStore = create<ContextState>()(
     {
       name: 'timebox-contexts',
       version: 1,
-      partialize: (s) => ({ contexts: s.contexts }),
+      partialize: (s) => ({
+        // Only persist contexts that have a real user_id (i.e., synced from DB)
+        // Don't persist the empty placeholder defaults
+        contexts: s.contexts.filter((c) => c.user_id),
+      }),
       migrate: (persisted, _version) => {
         const p = persisted as { contexts?: ProjectContext[] } | undefined;
-        // If persisted contexts is missing or empty (from a failed rollback), reset to defaults
-        if (!p?.contexts?.length) return { contexts: DEFAULT_CONTEXTS };
-        return p;
+        // Always start empty; let fetchContexts populate from DB
+        return { contexts: [] };
       },
     },
   ),

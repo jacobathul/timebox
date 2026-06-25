@@ -124,7 +124,12 @@ export const useTaskStore = create<TaskState>()(
 
         const uid = getUserId();
         if (uid) {
-          taskService.create(task, uid).catch(() => {
+          taskService.create(task, uid).then((saved) => {
+            // Replace temporary local ID with the server-assigned UUID
+            set((s) => ({
+              tasks: s.tasks.map((t) => t.id === task.id ? saved : t),
+            }));
+          }).catch(() => {
             set((s) => ({ tasks: s.tasks.filter((t) => t.id !== task.id) }));
             toast().addToast('Failed to save task', 'error');
           });

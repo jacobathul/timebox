@@ -53,7 +53,7 @@ export function TaskModal() {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
       onClick={(e) => { if (e.target === e.currentTarget) closeTaskModal(); }}
     >
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-modal overflow-hidden">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-modal overflow-hidden max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100">
           <h2 className="text-base font-semibold text-stone-800">{isEdit ? 'Edit Task' : 'New Task'}</h2>
           <button onClick={closeTaskModal} className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors">
@@ -61,7 +61,7 @@ export function TaskModal() {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4 overflow-y-auto flex-1">
           <input
             autoFocus
             type="text"
@@ -123,7 +123,7 @@ export function TaskModal() {
           </div>
 
           <div>
-            <label className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-2 block">Project</label>
+            <label className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-2 block">Context</label>
             <ContextSelector value={form.contextId ?? null} onChange={(id) => set('contextId', id)} />
           </div>
 
