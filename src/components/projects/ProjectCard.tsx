@@ -9,9 +9,10 @@ import { ProjectContextMenu } from './ProjectContextMenu';
 interface Props {
   project: AppProjectWithStats;
   onClick: () => void;
+  selectedForWeek?: boolean;
 }
 
-export function ProjectCard({ project, onClick }: Props) {
+export function ProjectCard({ project, onClick, selectedForWeek }: Props) {
   const contexts = useContextStore((s) => s.contexts);
   const context = project.context_id ? contexts.find((c) => c.id === project.context_id) : undefined;
 
@@ -53,6 +54,11 @@ export function ProjectCard({ project, onClick }: Props) {
           </div>
           <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
             <ProjectStatusBadge status={project.status} />
+            {selectedForWeek && (
+              <span className="px-2 py-0.5 rounded-full bg-accent-50 text-accent-600 text-[10px] font-semibold uppercase tracking-wide">
+                This week
+              </span>
+            )}
             <button
               type="button"
               aria-label="Project actions"

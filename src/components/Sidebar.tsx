@@ -50,6 +50,13 @@ export function Sidebar() {
           New Task
           <span className="ml-auto text-accent-200 text-xs font-normal">N</span>
         </button>
+        <button
+          onClick={() => navigate('/app/weekly-planning')}
+          className="mt-2 w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 transition-colors"
+        >
+          <CalendarDays size={16} />
+          Plan Week
+        </button>
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
