@@ -205,6 +205,12 @@ export const useContextStore = create<ContextState>()(
     {
       name: 'timebox-contexts',
       partialize: (s) => ({ contexts: s.contexts }),
+      onRehydrateStorage: () => (state) => {
+        // Guard against empty contexts array saved by a failed rollback
+        if (state && state.contexts.length === 0) {
+          state.contexts = DEFAULT_CONTEXTS;
+        }
+      },
     },
   ),
 );
