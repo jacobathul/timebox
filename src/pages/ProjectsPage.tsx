@@ -5,19 +5,16 @@ import { useProjectStore, computeProjectStats } from '../store/useProjectStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { ProjectCard } from '../components/projects/ProjectCard';
 import { ProjectFormDialog } from '../components/projects/ProjectFormDialog';
-import type { AppProject } from '../types';
 
 export function ProjectsPage() {
   const navigate = useNavigate();
-  const { projects, createProject, updateProject, deleteProject, markProjectComplete, archiveProject } = useProjectStore();
+  const { projects, createProject } = useProjectStore();
   const tasks = useTaskStore((s) => s.tasks);
 
   const [query, setQuery] = useState('');
   const [showCreate, setShowCreate] = useState(false);
-  const [editingProject, setEditingProject] = useState<AppProject | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState<AppProject | null>(null);
 
   const withStats = useMemo(
     () => projects.map((p) => computeProjectStats(p, tasks)),
@@ -92,10 +89,6 @@ export function ProjectsPage() {
                     key={p.id}
                     project={p}
                     onClick={() => navigate(`/app/projects/${p.id}`)}
-                    onEdit={() => setEditingProject(p)}
-                    onMarkComplete={() => markProjectComplete(p.id)}
-                    onArchive={() => archiveProject(p.id)}
-                    onDelete={() => setConfirmDelete(p)}
                   />
                 ))}
               </div>
@@ -119,10 +112,6 @@ export function ProjectsPage() {
                       key={p.id}
                       project={p}
                       onClick={() => navigate(`/app/projects/${p.id}`)}
-                      onEdit={() => setEditingProject(p)}
-                      onMarkComplete={() => markProjectComplete(p.id)}
-                      onArchive={() => archiveProject(p.id)}
-                      onDelete={() => setConfirmDelete(p)}
                     />
                   ))}
                 </div>
@@ -147,10 +136,6 @@ export function ProjectsPage() {
                       key={p.id}
                       project={p}
                       onClick={() => navigate(`/app/projects/${p.id}`)}
-                      onEdit={() => setEditingProject(p)}
-                      onMarkComplete={() => markProjectComplete(p.id)}
-                      onArchive={() => archiveProject(p.id)}
-                      onDelete={() => setConfirmDelete(p)}
                     />
                   ))}
                 </div>
@@ -165,30 +150,6 @@ export function ProjectsPage() {
           onConfirm={(data) => createProject(data)}
           onClose={() => setShowCreate(false)}
         />
-      )}
-
-      {editingProject && (
-        <ProjectFormDialog
-          editing={editingProject}
-          onConfirm={(data) => updateProject(editingProject.id, data)}
-          onClose={() => setEditingProject(null)}
-        />
-      )}
-
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl shadow-modal p-6 space-y-4">
-            <h2 className="font-semibold text-stone-800">Delete "{confirmDelete.name}"?</h2>
-            <p className="text-sm text-stone-500">Tasks in this project will not be deleted but will lose their project assignment.</p>
-            <div className="flex gap-2">
-              <button onClick={() => setConfirmDelete(null)} className="flex-1 py-2.5 rounded-xl text-sm font-medium text-stone-500 hover:bg-stone-100 transition-colors">Cancel</button>
-              <button
-                onClick={() => { deleteProject(confirmDelete.id); setConfirmDelete(null); }}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm"
-              >Delete</button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
