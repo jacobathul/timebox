@@ -212,8 +212,7 @@ export const useContextStore = create<ContextState>()(
         // Don't persist the empty placeholder defaults
         contexts: s.contexts.filter((c) => c.user_id),
       }),
-      migrate: (persisted, _version) => {
-        const p = persisted as { contexts?: ProjectContext[] } | undefined;
+      migrate: (_persisted, _version) => {
         // Always start empty; let fetchContexts populate from DB
         return { contexts: [] };
       },
