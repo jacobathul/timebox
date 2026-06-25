@@ -7,6 +7,8 @@ import { useProjectStore } from '../store/useProjectStore';
 import { useStore } from '../store/useStore';
 import { formatDuration } from '../utils/time';
 import { TaskContextMenu } from './TaskContextMenu';
+import { TimekeeperButton } from './TimekeeperButton';
+import { ManualTimeEntryDialog } from './ManualTimeEntryDialog';
 
 interface Props {
   task: Task;
@@ -38,6 +40,7 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
   const { openTaskModal } = useStore();
 
   const [ctxMenu, setCtxMenu] = React.useState<{ x: number; y: number } | null>(null);
+  const [manualDialogOpen, setManualDialogOpen] = React.useState(false);
 
   const context = task.contextId ? getById(task.contextId) : undefined;
   const isCompleted = task.status === 'completed';
@@ -115,16 +118,21 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
         </div>
 
         {showActions && (
-          <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              aria-label="Task actions"
-              onClick={handleMenuButtonClick}
-              className="p-1 rounded-lg text-stone-300 hover:text-stone-500 hover:bg-stone-100 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
-            >
-              <MoreHorizontal size={14} />
-            </button>
-          </div>
+          <>
+            {!isCompleted && (
+              <TimekeeperButton taskId={task.id} taskTitle={task.title} className="flex-shrink-0 mt-0.5" />
+            )}
+            <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                aria-label="Task actions"
+                onClick={handleMenuButtonClick}
+                className="p-1 rounded-lg text-stone-300 hover:text-stone-500 hover:bg-stone-100 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
+              >
+                <MoreHorizontal size={14} />
+              </button>
+            </div>
+          </>
         )}
       </div>
 
@@ -134,6 +142,15 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
           x={ctxMenu.x}
           y={ctxMenu.y}
           onClose={() => setCtxMenu(null)}
+          onLogTime={() => setManualDialogOpen(true)}
+        />
+      )}
+
+      {manualDialogOpen && (
+        <ManualTimeEntryDialog
+          taskId={task.id}
+          taskTitle={task.title}
+          onClose={() => setManualDialogOpen(false)}
         />
       )}
     </>

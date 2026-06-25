@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { RunningTimerBadge } from './RunningTimerBadge';
 import { formatDate, todayStr } from '../utils/time';
 
 const NAV_ITEMS: { path: string; label: string; icon: React.ReactNode; shortcut?: string }[] = [
@@ -74,6 +75,8 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <RunningTimerBadge />
 
       <div className="px-3 mb-1 space-y-0.5">
         <button

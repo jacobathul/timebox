@@ -1,6 +1,20 @@
 export type Priority = 'low' | 'medium' | 'high';
 export type TaskStatus = 'inbox' | 'scheduled' | 'completed';
 export type AppView = 'daily' | 'weekly' | 'plan' | 'review';
+export type TimeEntryType = 'timer' | 'manual';
+
+export interface TaskTimeEntry {
+  id: string;
+  userId: string;
+  taskId: string;
+  startedAt: string;      // ISO timestamp
+  endedAt: string | null; // null = timer still running
+  durationMinutes: number | null;
+  entryType: TimeEntryType;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Task {
   id: string;

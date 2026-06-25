@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   CalendarCheck, Calendar, Inbox, CheckCircle2, Circle,
-  Pencil, Copy, Trash2,
+  Pencil, Copy, Trash2, Timer,
 } from 'lucide-react';
 import { ContextMenu, ContextMenuItem, ContextMenuDivider, ContextMenuSubmenu } from './ui/ContextMenu';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -16,9 +16,10 @@ interface Props {
   x: number;
   y: number;
   onClose: () => void;
+  onLogTime?: () => void;
 }
 
-export function TaskContextMenu({ task, x, y, onClose }: Props) {
+export function TaskContextMenu({ task, x, y, onClose, onLogTime }: Props) {
   const {
     addTaskToToday, moveTaskToDate, moveTaskToInbox,
     completeTask, uncompleteTask, duplicateTask, deleteTask,
@@ -192,6 +193,14 @@ export function TaskContextMenu({ task, x, y, onClose }: Props) {
         label="Duplicate Task"
         onClick={handleDuplicate}
       />
+
+      {onLogTime && (
+        <ContextMenuItem
+          icon={<Timer size={14} />}
+          label="Log time manually"
+          onClick={() => { onLogTime(); onClose(); }}
+        />
+      )}
 
       <ContextMenuDivider />
 
