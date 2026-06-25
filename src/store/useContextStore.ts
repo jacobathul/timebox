@@ -146,7 +146,12 @@ export const useContextStore = create<ContextState>()(
         };
         set((s) => ({ contexts: [...s.contexts, ctx] }));
         if (uid) {
-          contextService.create(ctx).catch(() => {
+          contextService.create(ctx).then((saved) => {
+            // Replace temp local id with the server-assigned UUID
+            set((s) => ({
+              contexts: s.contexts.map((c) => c.id === ctx.id ? saved : c),
+            }));
+          }).catch(() => {
             set((s) => ({ contexts: s.contexts.filter((c) => c.id !== ctx.id) }));
             toast().addToast('Failed to save context', 'error');
           });

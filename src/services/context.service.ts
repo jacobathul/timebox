@@ -31,7 +31,7 @@ export const contextService = {
     const { data, error } = await supabase
       .from('contexts')
       .insert({
-        id: ctx.id,
+        // omit id — let Supabase generate a valid UUID
         user_id: ctx.user_id,
         parent_context_id: ctx.parent_context_id,
         name: ctx.name.trim(),
