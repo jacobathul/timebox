@@ -204,12 +204,13 @@ export const useContextStore = create<ContextState>()(
     }),
     {
       name: 'timebox-contexts',
+      version: 1,
       partialize: (s) => ({ contexts: s.contexts }),
-      onRehydrateStorage: () => (state) => {
-        // Guard against empty contexts array saved by a failed rollback
-        if (state && state.contexts.length === 0) {
-          state.contexts = DEFAULT_CONTEXTS;
-        }
+      migrate: (persisted, _version) => {
+        const p = persisted as { contexts?: ProjectContext[] } | undefined;
+        // If persisted contexts is missing or empty (from a failed rollback), reset to defaults
+        if (!p?.contexts?.length) return { contexts: DEFAULT_CONTEXTS };
+        return p;
       },
     },
   ),
