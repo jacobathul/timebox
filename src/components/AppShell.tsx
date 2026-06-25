@@ -39,6 +39,7 @@ export function AppShell() {
             <Route path="plan"              element={<PlanMyDayFlow />} />
             <Route path="review"            element={<EndOfDayReview />} />
             <Route path="settings/account"  element={<AccountSettingsPage />} />
+            <Route path="settings/contexts" element={<AccountSettingsPage initialTab="contexts" />} />
             <Route path="settings"          element={<Navigate to="account" replace />} />
             <Route path="*"                 element={<Navigate to="today" replace />} />
           </Routes>

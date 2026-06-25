@@ -1,11 +1,11 @@
 import { Download } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
-import { useProjectStore } from '../../store/useProjectStore';
+import { useContextStore } from '../../store/useContextStore';
 import { useAuthStore } from '../../store/useAuthStore';
 
 export function DataExportButton() {
   const { tasks, reviews } = useTaskStore();
-  const { projects } = useProjectStore();
+  const { contexts } = useContextStore();
   const { profile } = useAuthStore();
 
   function handleExport() {
@@ -13,7 +13,7 @@ export function DataExportButton() {
       exportedAt: new Date().toISOString(),
       user: { email: profile?.email, displayName: profile?.displayName },
       tasks,
-      projects,
+      contexts,
       reviews,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });

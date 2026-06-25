@@ -1,10 +1,22 @@
 // Mirror of the Supabase DB schema (snake_case).
 // These are used only in the service layer; the rest of the app uses the camelCase types in index.ts.
 
+export interface DbContext {
+  id: string;
+  user_id: string;
+  parent_context_id: string | null;
+  name: string;
+  color: string;
+  depth: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DbTask {
   id: string;
   user_id: string;
   project_id: string | null;
+  context_id: string | null;
   title: string;
   notes: string;
   estimated_minutes: number;

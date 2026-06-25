@@ -3,7 +3,7 @@ import { CheckCircle2, Circle, GripVertical, AlertTriangle } from 'lucide-react'
 import { useDraggable } from '@dnd-kit/core';
 import type { Task } from '../types';
 import { useTaskStore } from '../store/useTaskStore';
-import { useProjectStore } from '../store/useProjectStore';
+import { useContextStore } from '../store/useContextStore';
 import { useStore } from '../store/useStore';
 import { timeToPixels, durationToPixels, timeToMinutes, formatTime } from '../utils/time';
 
@@ -21,7 +21,7 @@ const PRIORITY_COLORS = {
 
 export function ScheduledTaskBlock({ task, hasOverlap = false, onResizeStart }: Props) {
   const { completeTask, uncompleteTask } = useTaskStore();
-  const { projects } = useProjectStore();
+  const { getById } = useContextStore();
   const { openTaskModal } = useStore();
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -37,7 +37,7 @@ export function ScheduledTaskBlock({ task, hasOverlap = false, onResizeStart }: 
 
   const isCompleted = task.status === 'completed';
   const colors = PRIORITY_COLORS[task.priority];
-  const project = projects.find((p) => p.id === task.projectId);
+  const context = task.contextId ? getById(task.contextId) : undefined;
   const isShort = height < 50;
 
   const style: React.CSSProperties = {
@@ -85,9 +85,9 @@ export function ScheduledTaskBlock({ task, hasOverlap = false, onResizeStart }: 
             {task.title}
           </p>
           {!isShort && <p className="text-xs text-stone-400 mt-0.5">{formatTime(task.startTime!)} – {formatTime(task.endTime!)}</p>}
-          {!isShort && project && (
-            <span className="inline-block text-xs mt-1 px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: `${project.color}20`, color: project.color }}>
-              {project.name}
+          {!isShort && context && (
+            <span className="inline-block text-xs mt-1 px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: `${context.color}20`, color: context.color }}>
+              {context.name}
             </span>
           )}
         </div>

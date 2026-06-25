@@ -11,7 +11,7 @@ function dbToTask(db: DbTask): Task {
     actualMinutes: db.actual_minutes,
     priority: db.priority,
     status: db.status === 'archived' ? 'completed' : db.status,
-    projectId: db.project_id,
+    contextId: db.context_id ?? db.project_id, // fallback for rows not yet migrated
     scheduledDate: db.scheduled_date,
     startTime: db.start_time,
     endTime: db.end_time,
@@ -22,21 +22,24 @@ function dbToTask(db: DbTask): Task {
 }
 
 function taskToInsert(task: Task, userId: string) {
-  return {
-    id: task.id,
+  const insert: Record<string, any> = {
     user_id: userId,
-    project_id: task.projectId,
     title: task.title,
     notes: task.notes,
     estimated_minutes: task.estimatedMinutes,
-    actual_minutes: task.actualMinutes,
     priority: task.priority,
     status: task.status,
+    actual_minutes: null,
+    context_id: task.contextId,
+    // Keep legacy column null for new writes; it references projects(id).
+    project_id: null,
     scheduled_date: task.scheduledDate,
     start_time: task.startTime,
     end_time: task.endTime,
     completed_at: task.completedAt,
   };
+
+  return insert;
 }
 
 export const taskService = {
@@ -69,7 +72,11 @@ export const taskService = {
     if (updates.actualMinutes !== undefined)  patch.actual_minutes = updates.actualMinutes;
     if (updates.priority !== undefined)       patch.priority = updates.priority;
     if (updates.status !== undefined)         patch.status = updates.status;
-    if (updates.projectId !== undefined)      patch.project_id = updates.projectId;
+    if (updates.contextId !== undefined)      {
+      patch.context_id = updates.contextId;
+      // Do not mirror context to legacy project_id; avoids FK conflicts.
+      patch.project_id = null;
+    }
     if (updates.scheduledDate !== undefined)  patch.scheduled_date = updates.scheduledDate;
     if (updates.startTime !== undefined)      patch.start_time = updates.startTime;
     if (updates.endTime !== undefined)        patch.end_time = updates.endTime;

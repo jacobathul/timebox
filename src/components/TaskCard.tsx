@@ -2,7 +2,7 @@ import React from 'react';
 import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Trash2 } from 'lucide-react';
 import type { Task } from '../types';
 import { useTaskStore } from '../store/useTaskStore';
-import { useProjectStore } from '../store/useProjectStore';
+import { useContextStore } from '../store/useContextStore';
 import { useStore } from '../store/useStore';
 import { formatDuration } from '../utils/time';
 
@@ -30,12 +30,12 @@ const PRIORITY_BADGE = {
 
 export function TaskCard({ task, compact = false, draggable, dragHandleProps, style, className = '', showActions = true }: Props) {
   const { completeTask, uncompleteTask, deleteTask } = useTaskStore();
-  const { projects } = useProjectStore();
+  const { getById } = useContextStore();
   const { openTaskModal } = useStore();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
-  const project = projects.find((p) => p.id === task.projectId);
+  const context = task.contextId ? getById(task.contextId) : undefined;
   const isCompleted = task.status === 'completed';
 
   React.useEffect(() => {
@@ -83,9 +83,9 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
         </p>
         {!compact && (
           <div className="flex items-center gap-2 mt-1 flex-wrap">
-            {project && (
-              <span className="text-xs font-medium px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${project.color}20`, color: project.color }}>
-                {project.name}
+            {context && (
+              <span className="text-xs font-medium px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${context.color}20`, color: context.color }}>
+                {context.name}
               </span>
             )}
             <span className="flex items-center gap-1 text-xs text-stone-400">
