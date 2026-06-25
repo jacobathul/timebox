@@ -3,6 +3,7 @@ import { CheckCircle2, Circle, ArrowRight, ArrowLeft, Sparkles, Clock, FolderKan
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTaskStore } from '../store/useTaskStore';
 import { useProjectStore } from '../store/useProjectStore';
+import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { todayStr, formatDuration } from '../utils/time';
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -18,9 +19,14 @@ const STEPS = [
 export function PlanMyDayFlow() {
   const { tasks, scheduleTask, updateTask } = useTaskStore();
   const projects = useProjectStore((s) => s.projects);
+  const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const today = todayStr();
+
+  React.useEffect(() => {
+    void ensureRecurringTasksGeneratedThrough(today);
+  }, [today, ensureRecurringTasksGeneratedThrough]);
 
   const preselectedProjectId = searchParams.get('projectId');
 

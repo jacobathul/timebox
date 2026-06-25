@@ -6,6 +6,7 @@ const DRAWER_ITEMS = [
   { path: '/app/review',            label: 'End of Day', Icon: Moon },
   { path: '/app/settings/contexts', label: 'Contexts',   Icon: FolderTree },
   { path: '/app/settings/account',  label: 'Settings',   Icon: Settings },
+  { path: '/app/settings/recurring-tasks', label: 'Recurring', Icon: FolderTree },
 ];
 
 interface Props {

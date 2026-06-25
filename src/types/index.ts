@@ -2,6 +2,9 @@ export type Priority = 'low' | 'medium' | 'high';
 export type TaskStatus = 'inbox' | 'scheduled' | 'completed';
 export type AppView = 'daily' | 'weekly' | 'plan' | 'review';
 export type TimeEntryType = 'timer' | 'manual';
+export type RecurrenceFrequency = 'daily' | 'weekdays' | 'weekly' | 'monthly' | 'yearly' | 'custom' | 'none';
+export type RecurringTemplateStatus = 'active' | 'paused' | 'archived';
+export type RecurrenceInstanceStatus = 'generated' | 'skipped' | 'moved' | 'completed';
 
 export interface TaskTimeEntry {
   id: string;
@@ -30,6 +33,9 @@ export interface Task {
   startTime: string | null;     // "HH:MM" in 24h
   endTime: string | null;       // "HH:MM" in 24h
   completedAt: string | null;   // ISO timestamp
+  recurringTemplateId: string | null;
+  recurrenceInstanceDate: string | null;
+  recurrenceStatus: RecurrenceInstanceStatus | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,6 +79,28 @@ export interface ProjectContext {
   depth: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface RecurringTaskTemplate {
+  id: string;
+  userId: string;
+  title: string;
+  notes: string | null;
+  estimatedMinutes: number | null;
+  priority: Priority;
+  contextId: string | null;
+  projectId: string | null;
+  recurrenceRule: string;
+  recurrenceSummary: string | null;
+  startDate: string;
+  endDate: string | null;
+  defaultStartTime: string | null;
+  defaultDurationMinutes: number | null;
+  timezone: string;
+  status: RecurringTemplateStatus;
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
 }
 
 export interface ContextTreeNode extends ProjectContext {

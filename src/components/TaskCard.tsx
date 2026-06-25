@@ -9,6 +9,7 @@ import { formatDuration } from '../utils/time';
 import { TaskContextMenu } from './TaskContextMenu';
 import { TimekeeperButton } from './TimekeeperButton';
 import { ManualTimeEntryDialog } from './ManualTimeEntryDialog';
+import { RecurringTaskBadge } from './recurrence/RecurringTaskBadge';
 
 interface Props {
   task: Task;
@@ -91,9 +92,12 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
         </button>
 
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-medium leading-snug truncate ${isCompleted ? 'line-through text-stone-400' : 'text-stone-800'}`}>
-            {task.title}
-          </p>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <p className={`text-sm font-medium leading-snug truncate ${isCompleted ? 'line-through text-stone-400' : 'text-stone-800'}`}>
+              {task.title}
+            </p>
+            {task.recurringTemplateId && <RecurringTaskBadge />}
+          </div>
           {!compact && (
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               {project && (

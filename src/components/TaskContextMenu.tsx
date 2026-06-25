@@ -6,10 +6,12 @@ import {
 import { ContextMenu, ContextMenuItem, ContextMenuDivider, ContextMenuSubmenu } from './ui/ContextMenu';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { useTaskStore } from '../store/useTaskStore';
+import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { useStore } from '../store/useStore';
 import { useToast } from '../store/useToastStore';
 import { todayStr, dateOffsetStr } from '../utils/time';
 import type { Task } from '../types';
+import { RecurringTaskScopeDialog } from './recurrence/RecurringTaskScopeDialog';
 
 interface Props {
   task: Task;
@@ -24,6 +26,7 @@ export function TaskContextMenu({ task, x, y, onClose, onLogTime }: Props) {
     addTaskToToday, moveTaskToDate, moveTaskToInbox,
     completeTask, uncompleteTask, duplicateTask, deleteTask,
   } = useTaskStore();
+  const { archiveRecurringTemplate, deleteFutureInstancesForTemplate } = useRecurringTaskStore();
   const { openTaskModal } = useStore();
   const toast = useToast();
 
@@ -101,6 +104,29 @@ export function TaskContextMenu({ task, x, y, onClose, onLogTime }: Props) {
   }
 
   if (showDeleteConfirm) {
+    if (task.recurringTemplateId) {
+      return (
+        <RecurringTaskScopeDialog
+          mode="delete"
+          taskTitle={task.title}
+          onThisOnly={() => {
+            deleteTask(task.id);
+            toast.success('Task deleted.');
+            onClose();
+          }}
+          onEntireSeries={() => {
+            if (task.recurringTemplateId) {
+              deleteTask(task.id);
+              void archiveRecurringTemplate(task.recurringTemplateId);
+              void deleteFutureInstancesForTemplate(task.recurringTemplateId, task.recurrenceInstanceDate ?? todayStr());
+            }
+            toast.success('Recurring series deleted.');
+            onClose();
+          }}
+          onCancel={onClose}
+        />
+      );
+    }
     return (
       <ConfirmDialog
         title="Delete task?"

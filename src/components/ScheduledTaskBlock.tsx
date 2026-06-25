@@ -8,6 +8,7 @@ import { useProjectStore } from '../store/useProjectStore';
 import { useStore } from '../store/useStore';
 import { timeToPixels, durationToPixels, timeToMinutes, formatTime } from '../utils/time';
 import { TimekeeperButton } from './TimekeeperButton';
+import { RecurringTaskBadge } from './recurrence/RecurringTaskBadge';
 
 interface Props {
   task: Task;
@@ -85,9 +86,12 @@ export function ScheduledTaskBlock({ task, hasOverlap = false, onResizeStart }: 
         </button>
 
         <div className="flex-1 min-w-0">
-          <p className={`text-xs font-semibold leading-tight truncate ${isCompleted ? 'line-through text-stone-400' : colors.text}`}>
-            {task.title}
-          </p>
+          <div className="flex items-center gap-1 min-w-0">
+            <p className={`text-xs font-semibold leading-tight truncate ${isCompleted ? 'line-through text-stone-400' : colors.text}`}>
+              {task.title}
+            </p>
+            {task.recurringTemplateId && <RecurringTaskBadge />}
+          </div>
           {!isShort && <p className="text-xs text-stone-400 mt-0.5">{formatTime(task.startTime!)} – {formatTime(task.endTime!)}</p>}
           {!isShort && (project || context) && (
             <span className="inline-block text-xs mt-1 px-1.5 py-0.5 rounded font-medium"

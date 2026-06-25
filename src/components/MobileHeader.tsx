@@ -10,6 +10,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/app/review':            'End of Day',
   '/app/settings/account':  'Settings',
   '/app/settings/contexts': 'Contexts',
+  '/app/settings/recurring-tasks': 'Recurring Tasks',
   '/app/settings':          'Settings',
 };
 

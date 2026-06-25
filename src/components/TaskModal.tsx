@@ -2,13 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { X, Clock, Calendar, Trash2, Timer } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
+import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { ContextSelector } from './contexts/ContextSelector';
 import { ProjectSelector } from './projects/ProjectSelector';
 import { TimekeeperButton } from './TimekeeperButton';
 import { TimeEntryList } from './TimeEntryList';
 import { formatDuration } from '../utils/time';
 import { useTimekeeperStore } from '../store/useTimekeeperStore';
+import { dateOffsetStr, todayStr } from '../utils/time';
 import type { Task, Priority } from '../types';
+import { buildRecurrenceRule } from '../utils/recurrence';
+import { RecurrenceSelector } from './recurrence/RecurrenceSelector';
+import type { RecurrenceFormState } from './recurrence/RecurrenceSummary';
+import { RecurringTaskScopeDialog } from './recurrence/RecurringTaskScopeDialog';
+import { RecurringTaskBadge } from './recurrence/RecurringTaskBadge';
 
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
   { value: 'low',    label: 'Low',    color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
@@ -21,10 +28,28 @@ const DURATION_PRESETS = [15, 30, 45, 60, 90, 120];
 export function TaskModal() {
   const { isTaskModalOpen, taskModalInitial, closeTaskModal } = useStore();
   const { addTask, updateTask, deleteTask } = useTaskStore();
+  const {
+    createRecurringTemplate,
+    updateRecurringTemplate,
+    refreshFutureInstancesForTemplate,
+    deleteFutureInstancesForTemplate,
+    archiveRecurringTemplate,
+  } = useRecurringTaskStore();
 
   const { runningEntry } = useTimekeeperStore();
   const isEdit = !!taskModalInitial?.id;
   const [form, setForm] = useState<Partial<Task>>({});
+  const [recurrence, setRecurrence] = useState<RecurrenceFormState>({
+    enabled: false,
+    frequency: 'weekly',
+    byDay: ['MO'],
+    byMonthDay: 1,
+    startDate: todayStr(),
+    endDate: '',
+    defaultStartTime: '',
+    defaultDurationMinutes: 30,
+  });
+  const [scopeMode, setScopeMode] = useState<'edit' | 'delete' | null>(null);
 
   useEffect(() => {
     if (isTaskModalOpen) {
@@ -32,6 +57,17 @@ export function TaskModal() {
         title: '', notes: '', estimatedMinutes: 30, priority: 'medium',
         contextId: null, projectId: null, scheduledDate: null, startTime: null, endTime: null,
       });
+      setRecurrence({
+        enabled: false,
+        frequency: 'weekly',
+        byDay: ['MO'],
+        byMonthDay: 1,
+        startDate: taskModalInitial?.scheduledDate ?? todayStr(),
+        endDate: '',
+        defaultStartTime: taskModalInitial?.startTime ?? '',
+        defaultDurationMinutes: taskModalInitial?.estimatedMinutes ?? 30,
+      });
+      setScopeMode(null);
     }
   }, [isTaskModalOpen, taskModalInitial]);
 
@@ -44,14 +80,126 @@ export function TaskModal() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title?.trim()) return;
-    if (isEdit && taskModalInitial?.id) updateTask(taskModalInitial.id, form);
-    else addTask(form);
+    if (!isEdit) {
+      if (recurrence.enabled) {
+        void createRecurringTemplate({
+          title: form.title ?? '',
+          notes: form.notes ?? '',
+          estimatedMinutes: form.estimatedMinutes ?? 30,
+          priority: form.priority ?? 'medium',
+          contextId: form.contextId ?? null,
+          projectId: form.projectId ?? null,
+          recurrenceRule: buildRecurrenceRule({
+            frequency: recurrence.frequency,
+            byDay: recurrence.byDay,
+            byMonthDay: recurrence.byMonthDay ? [recurrence.byMonthDay] : undefined,
+          }),
+          startDate: recurrence.startDate || todayStr(),
+          endDate: recurrence.endDate || null,
+          defaultStartTime: recurrence.defaultStartTime || form.startTime || null,
+          defaultDurationMinutes: recurrence.defaultDurationMinutes || form.estimatedMinutes || 30,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          status: 'active',
+        });
+      } else {
+        addTask(form);
+      }
+      closeTaskModal();
+      return;
+    }
+
+    if (taskModalInitial?.recurringTemplateId) {
+      setScopeMode('edit');
+      return;
+    }
+
+    const taskId = taskModalInitial?.id;
+    if (!taskId) return;
+    updateTask(taskId, form);
     closeTaskModal();
   }
 
   function handleDelete() {
-    if (isEdit && taskModalInitial?.id) deleteTask(taskModalInitial.id);
+    if (!isEdit || !taskModalInitial?.id) {
+      closeTaskModal();
+      return;
+    }
+    if (taskModalInitial.recurringTemplateId) {
+      setScopeMode('delete');
+      return;
+    }
+    deleteTask(taskModalInitial.id);
     closeTaskModal();
+  }
+
+  async function applyEditScope(instanceOnly: boolean) {
+    if (!taskModalInitial?.id) return;
+    if (instanceOnly || !taskModalInitial.recurringTemplateId) {
+      const moved = (
+        form.scheduledDate !== undefined && form.scheduledDate !== taskModalInitial.scheduledDate
+      ) || (
+        form.startTime !== undefined && form.startTime !== taskModalInitial.startTime
+      ) || (
+        form.endTime !== undefined && form.endTime !== taskModalInitial.endTime
+      );
+      updateTask(taskModalInitial.id, {
+        ...form,
+        recurrenceStatus: moved ? 'moved' : taskModalInitial.recurrenceStatus,
+      });
+      closeTaskModal();
+      return;
+    }
+
+    const templateId = taskModalInitial.recurringTemplateId;
+    const templateUpdates = {
+      title: form.title,
+      notes: form.notes,
+      estimatedMinutes: form.estimatedMinutes,
+      priority: form.priority,
+      contextId: form.contextId,
+      projectId: form.projectId,
+      defaultStartTime: form.startTime,
+      defaultDurationMinutes: form.estimatedMinutes,
+    };
+    updateTask(taskModalInitial.id, form);
+    await updateRecurringTemplate(templateId, templateUpdates);
+    const baseDate = taskModalInitial.recurrenceInstanceDate ?? todayStr();
+    const from = new Date(baseDate + 'T00:00:00');
+    from.setDate(from.getDate() + 1);
+    await refreshFutureInstancesForTemplate(templateId, from.toISOString().split('T')[0], dateOffsetStr(60));
+    closeTaskModal();
+  }
+
+  async function applyDeleteScope(instanceOnly: boolean) {
+    if (!taskModalInitial?.id) return;
+    if (instanceOnly || !taskModalInitial.recurringTemplateId) {
+      deleteTask(taskModalInitial.id);
+      closeTaskModal();
+      return;
+    }
+    const templateId = taskModalInitial.recurringTemplateId;
+    deleteTask(taskModalInitial.id);
+    await archiveRecurringTemplate(templateId);
+    await deleteFutureInstancesForTemplate(templateId, todayStr());
+    closeTaskModal();
+  }
+
+  if (scopeMode && taskModalInitial?.id) {
+    return (
+      <RecurringTaskScopeDialog
+        mode={scopeMode}
+        taskTitle={taskModalInitial.title ?? 'Task'}
+        onThisOnly={() => {
+          if (scopeMode === 'edit') void applyEditScope(true);
+          else void applyDeleteScope(true);
+        }}
+        onEntireSeries={() => {
+          if (scopeMode === 'edit') void applyEditScope(false);
+          else void applyDeleteScope(false);
+        }}
+        onCancel={() => setScopeMode(null)}
+      />
+    );
   }
 
   return (
@@ -143,6 +291,22 @@ export function TaskModal() {
             <label className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-2 block">Context</label>
             <ContextSelector value={form.contextId ?? null} onChange={(id) => set('contextId', id)} />
           </div>
+
+          {!isEdit && (
+            <RecurrenceSelector
+              value={recurrence}
+              onChange={(updates) => setRecurrence((current) => ({ ...current, ...updates }))}
+            />
+          )}
+
+          {isEdit && taskModalInitial?.recurringTemplateId && (
+            <div className="rounded-xl border border-accent-200 bg-accent-50 px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <RecurringTaskBadge />
+                <span className="text-xs font-medium text-accent-700">Recurring task</span>
+              </div>
+            </div>
+          )}
 
           {form.scheduledDate && (
             <div>

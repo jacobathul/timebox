@@ -97,6 +97,15 @@ export function Sidebar() {
           <Settings size={16} className={pathname === '/app/settings/account' ? 'text-accent-500' : 'text-stone-400'} />
           Settings
         </button>
+        <button
+          onClick={() => navigate('/app/settings/recurring-tasks')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+            pathname === '/app/settings/recurring-tasks' ? 'bg-accent-50 text-accent-700 font-medium' : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
+          }`}
+        >
+          <FolderTree size={16} className={pathname === '/app/settings/recurring-tasks' ? 'text-accent-500' : 'text-stone-400'} />
+          Recurring
+        </button>
         {user && (
           <button
             onClick={() => logout()}

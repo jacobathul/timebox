@@ -27,6 +27,9 @@ export interface DbTask {
   start_time: string | null;      // HH:MM
   end_time: string | null;        // HH:MM
   completed_at: string | null;
+  recurring_template_id: string | null;
+  recurrence_instance_date: string | null;
+  recurrence_status: 'generated' | 'skipped' | 'moved' | 'completed' | null;
   created_at: string;
   updated_at: string;
 }
@@ -99,4 +102,26 @@ export interface DbUserSettings {
   theme: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface DbRecurringTaskTemplate {
+  id: string;
+  user_id: string;
+  title: string;
+  notes: string | null;
+  estimated_minutes: number | null;
+  priority: 'low' | 'medium' | 'high';
+  context_id: string | null;
+  project_id: string | null;
+  recurrence_rule: string;
+  recurrence_summary: string | null;
+  start_date: string;
+  end_date: string | null;
+  default_start_time: string | null;
+  default_duration_minutes: number | null;
+  timezone: string;
+  status: 'active' | 'paused' | 'archived';
+  created_at: string;
+  updated_at: string;
+  archived_at: string | null;
 }
