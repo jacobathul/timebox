@@ -53,13 +53,22 @@ export function ContextSelector({ value, onChange, placeholder = 'No context', c
           <>
             <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selected.color }} />
             <span className="flex-1 text-left text-stone-700 truncate">{selected.name}</span>
-            <button
-              type="button"
+            <span
               onClick={(e) => { e.stopPropagation(); onChange(null); }}
               className="p-0.5 rounded text-stone-300 hover:text-stone-500 transition-colors"
+              role="button"
+              tabIndex={0}
+              aria-label="Clear selected context"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onChange(null);
+                }
+              }}
             >
               <X size={13} />
-            </button>
+            </span>
           </>
         ) : (
           <>

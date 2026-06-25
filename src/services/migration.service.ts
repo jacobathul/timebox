@@ -2,6 +2,15 @@ import type { Task, Project } from '../types';
 
 const OLD_STORAGE_KEY = 'flowday-storage'; // monolithic store from v1
 
+function isUuidLike(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function isGuestTask(task: Task): boolean {
+  // Guest tasks are locally generated IDs (non-UUID). Synced cloud rows are UUID IDs.
+  return !isUuidLike(task.id);
+}
+
 /**
  * Read tasks and projects from the old localStorage format.
  * Returns null if nothing to migrate.
@@ -14,7 +23,7 @@ export function getLocalGuestData(): { tasks: Task[]; projects: Project[] } | nu
     const tasks: Task[] = parsed?.state?.tasks ?? [];
     const projects: Project[] = parsed?.state?.projects ?? [];
     // Filter out the demo tasks (their IDs start with "demo-")
-    const realTasks = tasks.filter((t) => !t.id.startsWith('demo-'));
+    const realTasks = tasks.filter((t) => !t.id.startsWith('demo-') && isGuestTask(t));
     if (realTasks.length === 0) return null;
     return { tasks: realTasks, projects };
   } catch {
@@ -29,7 +38,7 @@ export function getNewFormatGuestTasks(): Task[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     const tasks: Task[] = parsed?.state?.tasks ?? [];
-    return tasks.filter((t) => !t.id.startsWith('demo-'));
+    return tasks.filter((t) => !t.id.startsWith('demo-') && isGuestTask(t));
   } catch {
     return [];
   }
