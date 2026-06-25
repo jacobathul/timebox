@@ -11,7 +11,8 @@ function dbToTask(db: DbTask): Task {
     actualMinutes: db.actual_minutes,
     priority: db.priority,
     status: db.status === 'archived' ? 'completed' : db.status,
-    contextId: db.context_id ?? db.project_id, // fallback for rows not yet migrated
+    contextId: db.context_id,
+    projectId: db.project_id,
     scheduledDate: db.scheduled_date,
     startTime: db.start_time,
     endTime: db.end_time,
@@ -31,8 +32,7 @@ function taskToInsert(task: Task, userId: string) {
     status: task.status,
     actual_minutes: null,
     context_id: task.contextId,
-    // Keep legacy column null for new writes; it references projects(id).
-    project_id: null,
+    project_id: task.projectId ?? null,
     scheduled_date: task.scheduledDate,
     start_time: task.startTime,
     end_time: task.endTime,
@@ -43,6 +43,18 @@ function taskToInsert(task: Task, userId: string) {
 }
 
 export const taskService = {
+  async fetchByProject(projectId: string, userId: string): Promise<Task[]> {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('project_id', projectId)
+      .neq('status', 'archived')
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data as DbTask[]).map(dbToTask);
+  },
+
   async fetchAll(userId: string): Promise<Task[]> {
     const { data, error } = await supabase
       .from('tasks')
@@ -72,11 +84,8 @@ export const taskService = {
     if (updates.actualMinutes !== undefined)  patch.actual_minutes = updates.actualMinutes;
     if (updates.priority !== undefined)       patch.priority = updates.priority;
     if (updates.status !== undefined)         patch.status = updates.status;
-    if (updates.contextId !== undefined)      {
-      patch.context_id = updates.contextId;
-      // Do not mirror context to legacy project_id; avoids FK conflicts.
-      patch.project_id = null;
-    }
+    if (updates.contextId !== undefined)  patch.context_id = updates.contextId;
+    if (updates.projectId !== undefined)  patch.project_id = updates.projectId;
     if (updates.scheduledDate !== undefined)  patch.scheduled_date = updates.scheduledDate;
     if (updates.startTime !== undefined)      patch.start_time = updates.startTime;
     if (updates.endTime !== undefined)        patch.end_time = updates.endTime;
