@@ -11,6 +11,7 @@ export interface Task {
   priority: Priority;
   status: TaskStatus;
   contextId: string | null;
+  projectId: string | null;
   scheduledDate: string | null; // ISO date string "YYYY-MM-DD"
   startTime: string | null;     // "HH:MM" in 24h
   endTime: string | null;       // "HH:MM" in 24h
@@ -19,6 +20,30 @@ export interface Task {
   updatedAt: string;
 }
 
+export type ProjectStatus = 'active' | 'completed' | 'archived';
+
+export interface AppProject {
+  id: string;
+  user_id: string;
+  context_id: string | null;
+  name: string;
+  description: string | null;
+  color: string | null;
+  due_date: string | null;
+  status: ProjectStatus;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppProjectWithStats extends AppProject {
+  totalTasks: number;
+  completedTasks: number;
+  remainingTasks: number;
+  progressPercentage: number;
+}
+
+// Legacy — kept for type compatibility; superseded by AppProject
 export interface Project {
   id: string;
   name: string;

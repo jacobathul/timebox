@@ -12,6 +12,8 @@ import { OfflineBanner } from './ui/OfflineBanner';
 import { collectMigratableTasks } from '../services/migration.service';
 import { useAuthStore } from '../store/useAuthStore';
 import { AccountSettingsPage } from '../pages/AccountSettingsPage';
+import { ProjectsPage } from '../pages/ProjectsPage';
+import { ProjectDetailPage } from '../pages/ProjectDetailPage';
 
 export function AppShell() {
   const { user } = useAuthStore();
@@ -35,6 +37,8 @@ export function AppShell() {
         <div className="flex-1 flex overflow-hidden">
           <Routes>
             <Route path="today"             element={<DailyPlanner />} />
+            <Route path="projects"          element={<ProjectsPage />} />
+            <Route path="projects/:id"      element={<ProjectDetailPage />} />
             <Route path="week"              element={<WeeklyView />} />
             <Route path="plan"              element={<PlanMyDayFlow />} />
             <Route path="review"            element={<EndOfDayReview />} />

@@ -4,6 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import type { Task } from '../types';
 import { useTaskStore } from '../store/useTaskStore';
 import { useContextStore } from '../store/useContextStore';
+import { useProjectStore } from '../store/useProjectStore';
 import { useStore } from '../store/useStore';
 import { timeToPixels, durationToPixels, timeToMinutes, formatTime } from '../utils/time';
 
@@ -22,6 +23,8 @@ const PRIORITY_COLORS = {
 export function ScheduledTaskBlock({ task, hasOverlap = false, onResizeStart }: Props) {
   const { completeTask, uncompleteTask } = useTaskStore();
   const { getById } = useContextStore();
+  const projects = useProjectStore((s) => s.projects);
+  const project = task.projectId ? projects.find((p) => p.id === task.projectId) : undefined;
   const { openTaskModal } = useStore();
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -85,9 +88,12 @@ export function ScheduledTaskBlock({ task, hasOverlap = false, onResizeStart }: 
             {task.title}
           </p>
           {!isShort && <p className="text-xs text-stone-400 mt-0.5">{formatTime(task.startTime!)} – {formatTime(task.endTime!)}</p>}
-          {!isShort && context && (
-            <span className="inline-block text-xs mt-1 px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: `${context.color}20`, color: context.color }}>
-              {context.name}
+          {!isShort && (project || context) && (
+            <span className="inline-block text-xs mt-1 px-1.5 py-0.5 rounded font-medium"
+              style={project
+                ? { backgroundColor: `${project.color ?? '#6b7280'}20`, color: project.color ?? '#6b7280' }
+                : { backgroundColor: `${context!.color}20`, color: context!.color }}>
+              {project ? project.name : context!.name}
             </span>
           )}
         </div>

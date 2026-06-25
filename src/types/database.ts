@@ -31,11 +31,27 @@ export interface DbTask {
   updated_at: string;
 }
 
-export interface DbProject {
+// Legacy projects (renamed to _legacy_projects in migration 003)
+export interface DbLegacyProject {
   id: string;
   user_id: string;
   name: string;
   color: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// New projects table (migration 003)
+export interface DbProject {
+  id: string;
+  user_id: string;
+  context_id: string | null;
+  name: string;
+  description: string | null;
+  color: string | null;
+  due_date: string | null;
+  status: 'active' | 'completed' | 'archived';
+  completed_at: string | null;
   created_at: string;
   updated_at: string;
 }

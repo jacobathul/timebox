@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useTaskStore } from '../../store/useTaskStore';
 import { useContextStore } from '../../store/useContextStore';
+import { useProjectStore } from '../../store/useProjectStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             useTaskStore.getState().fetchTasks(),
             useTaskStore.getState().fetchReviews(),
             useContextStore.getState().fetchContexts(),
+            useProjectStore.getState().fetchProjects(),
             useSettingsStore.getState().fetchSettings(),
           ]);
           await refreshProfile();
@@ -28,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           useTaskStore.getState().clearData();
           useContextStore.getState().clearContexts();
+          useProjectStore.getState().clearProjects();
         }
       },
     );

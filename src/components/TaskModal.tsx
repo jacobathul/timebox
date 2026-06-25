@@ -3,6 +3,7 @@ import { X, Clock, Calendar, Trash2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { ContextSelector } from './contexts/ContextSelector';
+import { ProjectSelector } from './projects/ProjectSelector';
 import type { Task, Priority } from '../types';
 
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
@@ -24,7 +25,7 @@ export function TaskModal() {
     if (isTaskModalOpen) {
       setForm(taskModalInitial ?? {
         title: '', notes: '', estimatedMinutes: 30, priority: 'medium',
-        contextId: null, scheduledDate: null, startTime: null, endTime: null,
+        contextId: null, projectId: null, scheduledDate: null, startTime: null, endTime: null,
       });
     }
   }, [isTaskModalOpen, taskModalInitial]);
@@ -120,6 +121,11 @@ export function TaskModal() {
                 className="w-20 px-2 py-1.5 rounded-lg border border-stone-200 text-sm text-stone-600 text-center outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-2 block">Project</label>
+            <ProjectSelector value={form.projectId ?? null} onChange={(id) => set('projectId', id)} />
           </div>
 
           <div>

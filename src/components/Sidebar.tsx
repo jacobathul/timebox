@@ -1,5 +1,5 @@
 import type React from 'react';
-import { CalendarDays, LayoutGrid, PlayCircle, Moon, Plus, Settings, LogOut, FolderTree } from 'lucide-react';
+import { CalendarDays, LayoutGrid, PlayCircle, Moon, Plus, Settings, LogOut, FolderTree, FolderKanban } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
@@ -7,10 +7,11 @@ import { useAuthStore } from '../store/useAuthStore';
 import { formatDate, todayStr } from '../utils/time';
 
 const NAV_ITEMS: { path: string; label: string; icon: React.ReactNode; shortcut?: string }[] = [
-  { path: '/app/today',  label: 'Today',       icon: <CalendarDays size={18} />, shortcut: 'D' },
-  { path: '/app/week',   label: 'Week',        icon: <LayoutGrid size={18} /> },
-  { path: '/app/plan',   label: 'Plan My Day', icon: <PlayCircle size={18} />,  shortcut: 'P' },
-  { path: '/app/review', label: 'End of Day',  icon: <Moon size={18} />,        shortcut: 'R' },
+  { path: '/app/today',    label: 'Today',       icon: <CalendarDays size={18} />, shortcut: 'D' },
+  { path: '/app/projects', label: 'Projects',    icon: <FolderKanban size={18} />, shortcut: 'G' },
+  { path: '/app/week',     label: 'Week',        icon: <LayoutGrid size={18} /> },
+  { path: '/app/plan',     label: 'Plan My Day', icon: <PlayCircle size={18} />,  shortcut: 'P' },
+  { path: '/app/review',   label: 'End of Day',  icon: <Moon size={18} />,        shortcut: 'R' },
 ];
 
 export function Sidebar() {

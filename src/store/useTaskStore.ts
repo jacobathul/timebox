@@ -18,7 +18,7 @@ function makeDemoTasks(): Task[] {
   ): Task => ({
     id, title, notes, estimatedMinutes: mins, actualMinutes: null,
     priority, status: startTime ? 'scheduled' : 'inbox',
-    contextId, scheduledDate: startTime ? today : null,
+    contextId, projectId: null, scheduledDate: startTime ? today : null,
     startTime: startTime ?? null, endTime: startTime ? addMinutes(startTime, mins) : null,
     completedAt: null, createdAt: now, updatedAt: now,
   });
@@ -113,6 +113,7 @@ export const useTaskStore = create<TaskState>()(
           priority: partial.priority ?? 'medium',
           status: partial.status ?? 'inbox',
           contextId: partial.contextId ?? null,
+          projectId: partial.projectId ?? null,
           scheduledDate: partial.scheduledDate ?? null,
           startTime: partial.startTime ?? null,
           endTime: partial.endTime ?? null,
