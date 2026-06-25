@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { X, Clock, Calendar, Trash2 } from 'lucide-react';
+import { X, Clock, Calendar, Trash2, Timer } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { ContextSelector } from './contexts/ContextSelector';
 import { ProjectSelector } from './projects/ProjectSelector';
+import { TimekeeperButton } from './TimekeeperButton';
+import { TimeEntryList } from './TimeEntryList';
+import { formatDuration } from '../utils/time';
+import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import type { Task, Priority } from '../types';
 
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
@@ -18,6 +22,7 @@ export function TaskModal() {
   const { isTaskModalOpen, taskModalInitial, closeTaskModal } = useStore();
   const { addTask, updateTask, deleteTask } = useTaskStore();
 
+  const { runningEntry } = useTimekeeperStore();
   const isEdit = !!taskModalInitial?.id;
   const [form, setForm] = useState<Partial<Task>>({});
 
@@ -159,6 +164,64 @@ export function TaskModal() {
                   </>
                 )}
               </div>
+            </div>
+          )}
+
+          {isEdit && taskModalInitial?.id && (
+            <div className="border-t border-stone-100 pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Timer size={14} className="text-stone-400" />
+                  <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+                    Time Tracking
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-stone-400">
+                  {(taskModalInitial as Task).estimatedMinutes && (
+                    <span>Est: {formatDuration((taskModalInitial as Task).estimatedMinutes)}</span>
+                  )}
+                  {(taskModalInitial as Task).actualMinutes != null && (taskModalInitial as Task).actualMinutes! > 0 && (
+                    <>
+                      <span>·</span>
+                      <span className="text-stone-600 font-medium">
+                        Actual: {formatDuration((taskModalInitial as Task).actualMinutes!)}
+                      </span>
+                      {(taskModalInitial as Task).estimatedMinutes > 0 && (
+                        <>
+                          <span>·</span>
+                          <span className={
+                            (taskModalInitial as Task).actualMinutes! > (taskModalInitial as Task).estimatedMinutes
+                              ? 'text-red-500' : 'text-emerald-600'
+                          }>
+                            {(taskModalInitial as Task).actualMinutes! > (taskModalInitial as Task).estimatedMinutes
+                              ? `+${formatDuration((taskModalInitial as Task).actualMinutes! - (taskModalInitial as Task).estimatedMinutes)}`
+                              : `-${formatDuration((taskModalInitial as Task).estimatedMinutes - (taskModalInitial as Task).actualMinutes!)}`
+                            }
+                          </span>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mb-3">
+                <TimekeeperButton
+                  taskId={taskModalInitial.id}
+                  taskTitle={taskModalInitial.title ?? ''}
+                  size="md"
+                />
+                <span className="text-xs text-stone-400">
+                  {runningEntry?.taskId === taskModalInitial.id
+                    ? 'Timer running — click to stop'
+                    : 'Start a timer to track time'}
+                </span>
+              </div>
+
+              <TimeEntryList
+                taskId={taskModalInitial.id}
+                taskTitle={taskModalInitial.title ?? ''}
+              />
             </div>
           )}
 

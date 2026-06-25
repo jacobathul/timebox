@@ -13,9 +13,10 @@ const PRIORITY_COLORS = {
 interface Props {
   projectId: string;
   projectContextId?: string | null;
+  filter?: 'remaining' | 'unplanned' | 'completed';
 }
 
-export function ProjectTaskList({ projectId, projectContextId }: Props) {
+export function ProjectTaskList({ projectId, projectContextId, filter }: Props) {
   const { tasks, completeTask, uncompleteTask } = useTaskStore();
   const { openTaskModal } = useStore();
 
@@ -23,8 +24,22 @@ export function ProjectTaskList({ projectId, projectContextId }: Props) {
     () => tasks.filter((t) => t.projectId === projectId),
     [tasks, projectId],
   );
-  const remaining = projectTasks.filter((t) => t.status !== 'completed');
-  const completed = projectTasks.filter((t) => t.status === 'completed');
+
+  const filteredTasks = useMemo(() => {
+    if (filter === 'remaining') {
+      return projectTasks.filter((t) => t.status !== 'completed');
+    }
+    if (filter === 'unplanned') {
+      return projectTasks.filter((t) => t.status !== 'completed' && !t.scheduledDate);
+    }
+    if (filter === 'completed') {
+      return projectTasks.filter((t) => t.status === 'completed');
+    }
+    return null; // null means use the default grouped view
+  }, [projectTasks, filter]);
+
+  const remaining = useMemo(() => projectTasks.filter((t) => t.status !== 'completed'), [projectTasks]);
+  const completed = useMemo(() => projectTasks.filter((t) => t.status === 'completed'), [projectTasks]);
 
   function handleAddTask() {
     openTaskModal({ projectId, contextId: projectContextId ?? null } as Parameters<typeof openTaskModal>[0]);
@@ -58,6 +73,46 @@ export function ProjectTaskList({ projectId, projectContextId }: Props) {
     );
   }
 
+  // Filtered view (single flat list)
+  if (filteredTasks !== null) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+              {filter === 'remaining' && `Remaining (${filteredTasks.length})`}
+              {filter === 'unplanned' && `Unplanned (${filteredTasks.length})`}
+              {filter === 'completed' && `Completed (${filteredTasks.length})`}
+            </h3>
+            {filter !== 'completed' && (
+              <button
+                onClick={handleAddTask}
+                className="flex items-center gap-1 text-xs text-accent-500 hover:text-accent-600 font-medium transition-colors"
+              >
+                <Plus size={13} />
+                Add task
+              </button>
+            )}
+          </div>
+          {filteredTasks.length === 0 ? (
+            <div className="py-6 text-center border border-dashed border-stone-200 rounded-xl">
+              <p className="text-sm text-stone-400">
+                {filter === 'remaining' && 'No remaining tasks.'}
+                {filter === 'unplanned' && 'No unplanned tasks — all tasks have a scheduled date.'}
+                {filter === 'completed' && 'No completed tasks yet.'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-0.5">
+              {filteredTasks.map((t) => <TaskRow key={t.id} task={t} />)}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Default grouped view (remaining + completed)
   return (
     <div className="space-y-4">
       {/* Remaining */}

@@ -61,6 +61,12 @@ interface TaskState {
   resizeTask: (id: string, newEndTime: string) => void;
   rollTaskToTomorrow: (id: string) => void;
 
+  // Context menu actions
+  addTaskToToday: (id: string) => void;
+  moveTaskToDate: (id: string, date: string) => void;
+  moveTaskToInbox: (id: string) => void;
+  duplicateTask: (id: string) => void;
+
   // Reviews
   saveReview: (review: DailyReview) => void;
   getReview: (date: string) => DailyReview | undefined;
@@ -212,6 +218,51 @@ export const useTaskStore = create<TaskState>()(
         get().updateTask(id, {
           status: 'inbox',
           scheduledDate: dateOffsetStr(1),
+          startTime: null,
+          endTime: null,
+        });
+      },
+
+      addTaskToToday: (id) => {
+        get().updateTask(id, {
+          status: 'scheduled',
+          scheduledDate: todayStr(),
+          startTime: null,
+          endTime: null,
+        });
+      },
+
+      moveTaskToDate: (id, date) => {
+        get().updateTask(id, {
+          status: 'scheduled',
+          scheduledDate: date,
+          startTime: null,
+          endTime: null,
+        });
+      },
+
+      moveTaskToInbox: (id) => {
+        get().updateTask(id, {
+          status: 'inbox',
+          scheduledDate: null,
+          startTime: null,
+          endTime: null,
+          completedAt: null,
+        });
+      },
+
+      duplicateTask: (id) => {
+        const task = get().tasks.find((t) => t.id === id);
+        if (!task) return;
+        get().addTask({
+          title: task.title,
+          notes: task.notes,
+          estimatedMinutes: task.estimatedMinutes,
+          priority: task.priority,
+          contextId: task.contextId,
+          projectId: task.projectId,
+          status: 'inbox',
+          scheduledDate: null,
           startTime: null,
           endTime: null,
         });

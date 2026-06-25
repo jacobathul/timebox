@@ -30,6 +30,7 @@ interface ProjectState {
   updateProject: (id: string, updates: Partial<Pick<AppProject, 'name' | 'description' | 'color' | 'due_date' | 'status' | 'context_id' | 'completed_at'>>) => void;
   deleteProject: (id: string) => void;
   markProjectComplete: (id: string) => void;
+  reopenProject: (id: string) => void;
   archiveProject: (id: string) => void;
   setSelectedProjectsForToday: (ids: string[]) => void;
   setSelectedTasksForToday: (ids: string[]) => void;
@@ -127,6 +128,10 @@ export const useProjectStore = create<ProjectState>()(
       markProjectComplete: (id) => {
         const now = new Date().toISOString();
         get().updateProject(id, { status: 'completed' as ProjectStatus, completed_at: now });
+      },
+
+      reopenProject: (id) => {
+        get().updateProject(id, { status: 'active' as ProjectStatus, completed_at: null });
       },
 
       archiveProject: (id) => {

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { CheckCircle2, Circle, ArrowRight, ArrowLeft, Sparkles, Clock, FolderKanban } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTaskStore } from '../store/useTaskStore';
 import { useProjectStore } from '../store/useProjectStore';
 import { todayStr, formatDuration } from '../utils/time';
@@ -19,10 +19,15 @@ export function PlanMyDayFlow() {
   const { tasks, scheduleTask, updateTask } = useTaskStore();
   const projects = useProjectStore((s) => s.projects);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const today = todayStr();
 
-  const [step, setStep] = useState<Step>(1);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<Set<string>>(new Set());
+  const preselectedProjectId = searchParams.get('projectId');
+
+  const [step, setStep] = useState<Step>(() => (preselectedProjectId ? 2 : 1));
+  const [selectedProjectIds, setSelectedProjectIds] = useState<Set<string>>(() =>
+    preselectedProjectId ? new Set([preselectedProjectId]) : new Set(),
+  );
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
   const [estimates, setEstimates] = useState<Record<string, number>>({});
   const [startTimes, setStartTimes] = useState<Record<string, string>>({});

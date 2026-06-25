@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Moon, CheckCircle2, Clock, RotateCcw, TrendingUp } from 'lucide-react';
+import { Moon, CheckCircle2, Clock, RotateCcw, TrendingUp, Timer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '../store/useTaskStore';
+import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { todayStr, formatDateFull, formatDuration } from '../utils/time';
-import type { DailyReview } from '../types';
+import type { DailyReview, TaskTimeEntry } from '../types';
 
 export function EndOfDayReview() {
   const { tasks, saveReview, getReview, rollTaskToTomorrow } = useTaskStore();
+  const { fetchTimeEntriesForDate } = useTimekeeperStore();
   const navigate = useNavigate();
   const today = todayStr();
 
@@ -19,6 +21,19 @@ export function EndOfDayReview() {
 
   const [reflection, setReflection] = useState(existingReview?.reflection ?? '');
   const [saved, setSaved] = useState(false);
+  const [todayEntries, setTodayEntries] = useState<TaskTimeEntry[]>([]);
+
+  useEffect(() => {
+    fetchTimeEntriesForDate(today).then(setTodayEntries);
+  }, [today, fetchTimeEntriesForDate]);
+
+  const trackedMinsToday = todayEntries.reduce((acc, e) => acc + (e.durationMinutes ?? 0), 0);
+  const tasksWithNoTracking = completedToday.filter(
+    (t) => !todayEntries.some((e) => e.taskId === t.id),
+  );
+  const tasksExceededEstimate = completedToday.filter(
+    (t) => t.actualMinutes != null && t.actualMinutes > t.estimatedMinutes,
+  );
 
   useEffect(() => {
     setReflection(existingReview?.reflection ?? '');
@@ -84,6 +99,45 @@ export function EndOfDayReview() {
               <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
                 <div className="h-full bg-accent-400 rounded-full transition-all" style={{ width: `${Math.min(100, completionRate)}%` }} />
               </div>
+            </div>
+          )}
+
+          {trackedMinsToday > 0 && (
+            <div className="bg-white rounded-2xl border border-stone-200 shadow-card p-4">
+              <h3 className="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                <Timer size={14} className="text-accent-500" />Time Tracked Today
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center">
+                  <p className="text-lg font-bold text-stone-800">{formatDuration(plannedMins)}</p>
+                  <p className="text-xs text-stone-400 mt-0.5">Planned</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-accent-600">{formatDuration(trackedMinsToday)}</p>
+                  <p className="text-xs text-stone-400 mt-0.5">Tracked</p>
+                </div>
+                <div className="text-center">
+                  <p className={`text-lg font-bold ${trackedMinsToday > plannedMins ? 'text-red-500' : 'text-emerald-600'}`}>
+                    {trackedMinsToday > plannedMins
+                      ? `+${formatDuration(trackedMinsToday - plannedMins)}`
+                      : plannedMins > 0
+                        ? `-${formatDuration(plannedMins - trackedMinsToday)}`
+                        : '—'
+                    }
+                  </p>
+                  <p className="text-xs text-stone-400 mt-0.5">Difference</p>
+                </div>
+              </div>
+              {tasksExceededEstimate.length > 0 && (
+                <p className="text-xs text-amber-600 mt-3">
+                  {tasksExceededEstimate.length} task{tasksExceededEstimate.length > 1 ? 's' : ''} took longer than estimated.
+                </p>
+              )}
+              {tasksWithNoTracking.length > 0 && (
+                <p className="text-xs text-stone-400 mt-1">
+                  {tasksWithNoTracking.length} completed task{tasksWithNoTracking.length > 1 ? 's' : ''} had no timer.
+                </p>
+              )}
             </div>
           )}
 

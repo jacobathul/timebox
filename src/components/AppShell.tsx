@@ -14,15 +14,23 @@ import { ToastContainer } from './ui/Toast';
 import { OfflineBanner } from './ui/OfflineBanner';
 import { collectMigratableTasks } from '../services/migration.service';
 import { useAuthStore } from '../store/useAuthStore';
+import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { AccountSettingsPage } from '../pages/AccountSettingsPage';
 import { ProjectsPage } from '../pages/ProjectsPage';
 import { ProjectDetailPage } from '../pages/ProjectDetailPage';
 
 export function AppShell() {
   const { user } = useAuthStore();
+  const { fetchRunningTimer } = useTimekeeperStore();
   const [migrationTasks, setMigrationTasks] = useState<ReturnType<typeof collectMigratableTasks>>([]);
   const [migrationChecked, setMigrationChecked] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetchRunningTimer();
+    }
+  }, [user, fetchRunningTimer]);
 
   useEffect(() => {
     if (user && !migrationChecked) {

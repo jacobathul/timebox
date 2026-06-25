@@ -56,6 +56,19 @@ export interface DbProject {
   updated_at: string;
 }
 
+export interface DbTimeEntry {
+  id: string;
+  user_id: string;
+  task_id: string;
+  started_at: string;
+  ended_at: string | null;
+  duration_minutes: number | null;
+  entry_type: 'timer' | 'manual';
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DbDailyReview {
   id: string;
   user_id: string;
