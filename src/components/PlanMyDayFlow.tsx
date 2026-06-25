@@ -103,13 +103,13 @@ export function PlanMyDayFlow() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
       {/* Progress header */}
-      <div className="bg-white border-b border-stone-200 px-8 py-5 flex-shrink-0">
+      <div className="bg-white border-b border-stone-200 px-4 md:px-8 py-4 md:py-5 flex-shrink-0">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles size={18} className="text-accent-500" />
             <h1 className="text-lg font-semibold text-stone-800">Plan My Day</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1">
             {STEPS.map(({ step: s, label }) => (
               <React.Fragment key={s}>
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
@@ -125,7 +125,7 @@ export function PlanMyDayFlow() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 md:py-6">
         <div className="max-w-2xl mx-auto">
 
           {/* Step 1: Pick Projects */}
@@ -311,7 +311,7 @@ export function PlanMyDayFlow() {
       </div>
 
       {step < 5 && (
-        <div className="bg-white border-t border-stone-200 px-8 py-4 flex items-center justify-between flex-shrink-0">
+        <div className="bg-white border-t border-stone-200 px-4 md:px-8 py-4 flex items-center justify-between flex-shrink-0">
           <button onClick={handleBack} disabled={step === 1}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-stone-500 hover:bg-stone-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
             <ArrowLeft size={16} /> Back

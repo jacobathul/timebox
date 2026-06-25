@@ -50,19 +50,25 @@ export function TaskModal() {
   }
 
   return (
+    /* Outer backdrop — on mobile fills screen, on desktop centers modal */
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex flex-col md:items-center md:justify-center bg-black/30 backdrop-blur-sm md:p-4"
       onClick={(e) => { if (e.target === e.currentTarget) closeTaskModal(); }}
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-modal overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100">
+      {/* Modal card — full height on mobile, constrained on desktop */}
+      <div className="w-full flex-1 md:flex-none bg-white md:rounded-2xl shadow-modal overflow-hidden md:max-h-[90vh] md:max-w-2xl flex flex-col">
+        <div className="flex items-center justify-between px-4 md:px-6 pt-4 md:pt-5 pb-4 border-b border-stone-100 flex-shrink-0">
           <h2 className="text-base font-semibold text-stone-800">{isEdit ? 'Edit Task' : 'New Task'}</h2>
-          <button onClick={closeTaskModal} className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors">
+          <button
+            onClick={closeTaskModal}
+            className="p-2 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
             <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="px-4 md:px-6 py-4 space-y-4 overflow-y-auto flex-1">
           <input
             autoFocus
             type="text"
@@ -88,7 +94,7 @@ export function TaskModal() {
                   key={value}
                   type="button"
                   onClick={() => set('priority', value)}
-                  className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${form.priority === value ? color : 'text-stone-400 bg-white border-stone-200 hover:border-stone-300'}`}
+                  className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all min-h-[44px] ${form.priority === value ? color : 'text-stone-400 bg-white border-stone-200 hover:border-stone-300'}`}
                 >
                   {label}
                 </button>
@@ -106,7 +112,7 @@ export function TaskModal() {
                   key={mins}
                   type="button"
                   onClick={() => set('estimatedMinutes', mins)}
-                  className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${form.estimatedMinutes === mins ? 'bg-accent-50 border-accent-300 text-accent-700' : 'text-stone-500 bg-white border-stone-200 hover:border-stone-300'}`}
+                  className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all min-h-[44px] ${form.estimatedMinutes === mins ? 'bg-accent-50 border-accent-300 text-accent-700' : 'text-stone-500 bg-white border-stone-200 hover:border-stone-300'}`}
                 >
                   {mins < 60 ? `${mins}m` : `${mins / 60}h`}
                 </button>
@@ -118,7 +124,7 @@ export function TaskModal() {
                 step={5}
                 value={form.estimatedMinutes ?? 30}
                 onChange={(e) => set('estimatedMinutes', Number(e.target.value))}
-                className="w-20 px-2 py-1.5 rounded-lg border border-stone-200 text-sm text-stone-600 text-center outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400"
+                className="w-20 px-2 py-2 rounded-lg border border-stone-200 text-sm text-stone-600 text-center outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400 min-h-[44px]"
               />
             </div>
           </div>
@@ -138,18 +144,18 @@ export function TaskModal() {
               <label className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-2 block">
                 <Calendar size={12} className="inline mr-1" />Scheduled
               </label>
-              <div className="flex gap-2 items-center">
+              <div className="flex flex-wrap gap-2 items-center">
                 <input
                   type="date"
                   value={form.scheduledDate ?? ''}
                   onChange={(e) => set('scheduledDate', e.target.value)}
-                  className="px-3 py-1.5 rounded-lg border border-stone-200 text-sm text-stone-600 outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400"
+                  className="px-3 py-2 rounded-lg border border-stone-200 text-sm text-stone-600 outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400 min-h-[44px]"
                 />
                 {form.startTime && (
                   <>
-                    <input type="time" value={form.startTime ?? ''} onChange={(e) => set('startTime', e.target.value)} className="px-3 py-1.5 rounded-lg border border-stone-200 text-sm text-stone-600 outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400" />
+                    <input type="time" value={form.startTime ?? ''} onChange={(e) => set('startTime', e.target.value)} className="px-3 py-2 rounded-lg border border-stone-200 text-sm text-stone-600 outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400 min-h-[44px]" />
                     <span className="text-stone-400 text-sm">→</span>
-                    <input type="time" value={form.endTime ?? ''} onChange={(e) => set('endTime', e.target.value)} className="px-3 py-1.5 rounded-lg border border-stone-200 text-sm text-stone-600 outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400" />
+                    <input type="time" value={form.endTime ?? ''} onChange={(e) => set('endTime', e.target.value)} className="px-3 py-2 rounded-lg border border-stone-200 text-sm text-stone-600 outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400 min-h-[44px]" />
                   </>
                 )}
               </div>
@@ -158,15 +164,15 @@ export function TaskModal() {
 
           <div className="flex items-center justify-between pt-2">
             {isEdit ? (
-              <button type="button" onClick={handleDelete} className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-600 transition-colors">
+              <button type="button" onClick={handleDelete} className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-600 transition-colors min-h-[44px] px-1">
                 <Trash2 size={14} />Delete task
               </button>
             ) : <div />}
             <div className="flex gap-2">
-              <button type="button" onClick={closeTaskModal} className="px-4 py-2 rounded-xl text-sm font-medium text-stone-500 hover:bg-stone-100 transition-colors">
+              <button type="button" onClick={closeTaskModal} className="px-4 py-2 rounded-xl text-sm font-medium text-stone-500 hover:bg-stone-100 transition-colors min-h-[44px]">
                 Cancel
               </button>
-              <button type="submit" className="px-4 py-2 rounded-xl text-sm font-medium bg-accent-500 text-white hover:bg-accent-600 transition-colors shadow-sm">
+              <button type="submit" className="px-4 py-2 rounded-xl text-sm font-medium bg-accent-500 text-white hover:bg-accent-600 transition-colors shadow-sm min-h-[44px]">
                 {isEdit ? 'Save changes' : 'Add task'}
               </button>
             </div>

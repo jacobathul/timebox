@@ -9,16 +9,23 @@
     box-sizing: border-box;
   }
 
+  html {
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+
   body {
     margin: 0;
     background-color: #f5f5f4;
     font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
   #root {
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
   }
 }
@@ -41,5 +48,19 @@
   .drag-over {
     background-color: #e0f2fe !important;
     border-color: #38bdf8 !important;
+  }
+
+  /* Safe area padding helpers */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pl-safe {
+    padding-left: env(safe-area-inset-left);
+  }
+  .pr-safe {
+    padding-right: env(safe-area-inset-right);
   }
 }

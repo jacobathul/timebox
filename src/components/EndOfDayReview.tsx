@@ -46,7 +46,7 @@ export function EndOfDayReview() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
-      <div className="bg-white border-b border-stone-200 px-8 py-5 flex-shrink-0">
+      <div className="bg-white border-b border-stone-200 px-4 md:px-8 py-4 md:py-5 flex-shrink-0">
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <Moon size={20} className="text-accent-400" />
           <div>
@@ -56,9 +56,9 @@ export function EndOfDayReview() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 md:py-6">
         <div className="max-w-2xl mx-auto space-y-6">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             <div className="bg-white rounded-2xl border border-stone-200 shadow-card p-4 text-center">
               <p className="text-2xl font-bold text-stone-800">{completedToday.length}</p>
               <p className="text-xs text-stone-400 mt-1">Tasks completed</p>

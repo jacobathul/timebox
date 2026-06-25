@@ -7,6 +7,7 @@ import {
   getWeekStart,
   getWeekDays,
   formatDate,
+  formatDateFull,
 } from '../utils/time';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -16,6 +17,7 @@ export function WeeklyView() {
   const { setSelectedDate, setView } = useStore();
   const today = todayStr();
   const [weekStart, setWeekStart] = useState(() => getWeekStart(today));
+  const [mobileDay, setMobileDay] = useState(today);
   const weekDays = getWeekDays(weekStart);
 
   function goToDay(date: string) {
@@ -26,37 +28,128 @@ export function WeeklyView() {
   function prevWeek() {
     const d = new Date(weekStart + 'T00:00:00');
     d.setDate(d.getDate() - 7);
-    setWeekStart(d.toISOString().split('T')[0]);
+    const newStart = d.toISOString().split('T')[0];
+    setWeekStart(newStart);
+    setMobileDay(getWeekDays(newStart)[0]);
   }
 
   function nextWeek() {
     const d = new Date(weekStart + 'T00:00:00');
     d.setDate(d.getDate() + 7);
-    setWeekStart(d.toISOString().split('T')[0]);
+    const newStart = d.toISOString().split('T')[0];
+    setWeekStart(newStart);
+    setMobileDay(getWeekDays(newStart)[0]);
   }
+
+  const mobileDayTasks = tasks.filter((t) => t.scheduledDate === mobileDay && t.startTime);
+  const mobileDayInbox = tasks.filter((t) => t.scheduledDate === mobileDay && !t.startTime);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
-      <div className="bg-white border-b border-stone-200 px-6 py-4 flex-shrink-0">
+
+      {/* Header */}
+      <div className="bg-white border-b border-stone-200 px-4 md:px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <LayoutGrid size={18} className="text-stone-400" />
+          <div className="flex items-center gap-2 md:gap-3">
+            <LayoutGrid size={18} className="text-stone-400 hidden md:block" />
             <h1 className="text-lg font-semibold text-stone-800">Weekly View</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={prevWeek} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors"><ChevronLeft size={18} /></button>
-            <span className="text-sm text-stone-600 font-medium min-w-[140px] text-center">
+            <button onClick={prevWeek} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center md:min-h-0 md:min-w-0"><ChevronLeft size={18} /></button>
+            <span className="text-sm text-stone-600 font-medium min-w-[130px] md:min-w-[140px] text-center">
               {formatDate(weekDays[0])} – {formatDate(weekDays[6])}
             </span>
-            <button onClick={nextWeek} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors"><ChevronRight size={18} /></button>
-            <button onClick={() => setWeekStart(getWeekStart(today))} className="ml-2 px-3 py-1.5 rounded-xl text-sm text-stone-500 hover:bg-stone-100 transition-colors">
+            <button onClick={nextWeek} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center md:min-h-0 md:min-w-0"><ChevronRight size={18} /></button>
+            <button onClick={() => { setWeekStart(getWeekStart(today)); setMobileDay(today); }} className="ml-1 px-3 py-1.5 rounded-xl text-sm text-stone-500 hover:bg-stone-100 transition-colors hidden md:block">
               This week
             </button>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
+      {/* ── Mobile layout: horizontal day strip + single-day task list ── */}
+      <div className="flex md:hidden flex-col flex-1 overflow-hidden">
+        {/* Day strip */}
+        <div className="bg-white border-b border-stone-200 flex-shrink-0 overflow-x-auto">
+          <div className="flex px-2 py-2 gap-1 min-w-max">
+            {weekDays.map((date, idx) => {
+              const isSelected = date === mobileDay;
+              const isToday = date === today;
+              const isPast = date < today;
+              const count = tasks.filter((t) => t.scheduledDate === date && t.startTime).length;
+              return (
+                <button
+                  key={date}
+                  onClick={() => setMobileDay(date)}
+                  className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl min-w-[52px] min-h-[64px] justify-center transition-colors ${
+                    isSelected
+                      ? 'bg-accent-500 text-white'
+                      : isToday
+                      ? 'bg-accent-50 text-accent-600'
+                      : isPast
+                      ? 'text-stone-300'
+                      : 'text-stone-500 hover:bg-stone-50'
+                  }`}
+                >
+                  <span className="text-[10px] font-medium uppercase tracking-wide">{DAY_LABELS[idx]}</span>
+                  <span className="text-lg font-bold leading-none">{new Date(date + 'T00:00:00').getDate()}</span>
+                  {count > 0 && (
+                    <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/70' : 'bg-accent-400'}`} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Single day detail */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          <p className="text-sm font-semibold text-stone-700">{formatDateFull(mobileDay)}</p>
+
+          {mobileDayTasks.length === 0 && mobileDayInbox.length === 0 && (
+            <div className="py-12 text-center">
+              <p className="text-sm text-stone-400">No tasks scheduled</p>
+              <button
+                onClick={() => goToDay(mobileDay)}
+                className="mt-3 text-sm text-accent-500 hover:text-accent-600 font-medium transition-colors"
+              >
+                Open day in planner →
+              </button>
+            </div>
+          )}
+
+          {mobileDayTasks.map((task) => (
+            <div
+              key={task.id}
+              onClick={() => goToDay(mobileDay)}
+              className={`flex items-center gap-3 p-3 rounded-xl border bg-white cursor-pointer active:opacity-70 transition-opacity ${
+                task.status === 'completed' ? 'border-stone-100 opacity-60' : 'border-stone-200'
+              }`}
+            >
+              {task.status === 'completed'
+                ? <CheckCircle2 size={15} className="text-emerald-400 flex-shrink-0" />
+                : <Clock size={15} className="text-stone-300 flex-shrink-0" />
+              }
+              <p className={`text-sm flex-1 min-w-0 truncate ${task.status === 'completed' ? 'text-stone-400 line-through' : 'text-stone-700'}`}>
+                {task.title}
+              </p>
+              <span className="text-xs text-stone-400 flex-shrink-0">{task.startTime}</span>
+            </div>
+          ))}
+
+          {mobileDayTasks.length > 0 && (
+            <button
+              onClick={() => goToDay(mobileDay)}
+              className="w-full py-2.5 text-sm text-accent-500 hover:text-accent-600 font-medium transition-colors text-center"
+            >
+              Open in Daily Planner →
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ── Desktop layout: 7-column grid ── */}
+      <div className="hidden md:block flex-1 overflow-y-auto p-6">
         <div className="grid grid-cols-7 gap-3 h-full min-h-[500px]">
           {weekDays.map((date, idx) => {
             const dayTasks = tasks.filter((t) => t.scheduledDate === date && t.startTime);

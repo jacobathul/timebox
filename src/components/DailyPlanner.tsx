@@ -69,6 +69,7 @@ export function DailyPlanner() {
 
   const calendarRef = useRef<HTMLDivElement>(null);
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+  const [mobileTab, setMobileTab] = useState<'inbox' | 'schedule'>('schedule');
   const resizeRef = useRef<{ taskId: string; startY: number; startEndTime: string } | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
@@ -82,6 +83,7 @@ export function DailyPlanner() {
     const [eh, em] = t.endTime.split(':').map(Number);
     return acc + (eh * 60 + em) - (sh * 60 + sm);
   }, 0);
+  const inboxCount = tasks.filter((t) => t.status === 'inbox').length;
 
   function getTimeAtY(clientY: number): string {
     const rect = calendarRef.current?.getBoundingClientRect();
@@ -146,76 +148,115 @@ export function DailyPlanner() {
 
   const isToday = selectedDate === todayStr();
 
+  /* Shared calendar panel (used in both mobile schedule tab and desktop) */
+  const CalendarPanel = (
+    <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
+      {/* Date navigation header */}
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-stone-200 bg-white flex-shrink-0">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-0.5">
+            <button onClick={() => navigateDay(-1)} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center md:min-h-0 md:min-w-0"><ChevronLeft size={18} /></button>
+            <button onClick={() => navigateDay(1)} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center md:min-h-0 md:min-w-0"><ChevronRight size={18} /></button>
+          </div>
+          <div>
+            <h2 className="text-base md:text-lg font-semibold text-stone-800 leading-tight">{formatDateFull(selectedDate)}</h2>
+            {isToday && <span className="text-xs text-accent-500 font-medium">Today</span>}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 md:gap-3">
+          {overlapWarnings.length > 0 && (
+            <div className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
+              <AlertTriangle size={13} />
+              <span className="hidden sm:inline">{overlapWarnings.length} overlap{overlapWarnings.length > 1 ? 's' : ''}</span>
+            </div>
+          )}
+          <div className="hidden sm:flex items-center gap-1.5 text-sm text-stone-400">
+            <Clock size={14} />
+            <span>{Math.floor(totalMins / 60)}h{totalMins % 60 > 0 ? ` ${totalMins % 60}m` : ''}</span>
+          </div>
+          {!isToday && (
+            <button onClick={() => setSelectedDate(todayStr())} className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-accent-600 bg-accent-50 hover:bg-accent-100 transition-colors">
+              Today
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Calendar grid */}
+      <div ref={calendarRef} className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="flex">
+          <div className="w-12 md:w-16 flex-shrink-0 select-none">
+            {HOURS.map(({ hour, label }) => (
+              <div key={hour} className="flex items-start justify-end pr-2 md:pr-3" style={{ height: HOUR_HEIGHT_PX }}>
+                <span className="text-xs text-stone-300 -mt-2">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex-1 relative border-l border-stone-200 mr-2 md:mr-4">
+            {HOURS.map(({ hour }) => (
+              <div key={hour} className="absolute left-0 right-0 border-t border-stone-100" style={{ top: (hour - DAY_START_HOUR) * HOUR_HEIGHT_PX }} />
+            ))}
+            {HOURS.map(({ hour }) => (
+              <div key={`h-${hour}`} className="absolute left-0 right-0 border-t border-stone-50 border-dashed" style={{ top: (hour - DAY_START_HOUR) * HOUR_HEIGHT_PX + HOUR_HEIGHT_PX / 2 }} />
+            ))}
+            <CurrentTimeIndicator date={selectedDate} />
+
+            <CalendarDropZone>
+              {todayScheduled.map((task) => (
+                <div key={task.id} data-task-block>
+                  <ScheduledTaskBlock task={task} hasOverlap={overlapIds.has(task.id)} onResizeStart={handleResizeStart} />
+                </div>
+              ))}
+              <div className="absolute inset-0 z-0" onClick={handleCalendarClick} />
+            </CalendarDropZone>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex h-full overflow-hidden">
-        {/* Inbox */}
-        <div className="w-72 flex-shrink-0 border-r border-stone-200 bg-white overflow-hidden flex flex-col">
+
+      {/* ── Mobile layout: tab bar + single panel ── */}
+      <div className="flex md:hidden flex-col flex-1 overflow-hidden">
+        {/* Tab switcher */}
+        <div className="flex bg-white border-b border-stone-200 flex-shrink-0">
+          <button
+            onClick={() => setMobileTab('schedule')}
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${mobileTab === 'schedule' ? 'border-accent-500 text-accent-600' : 'border-transparent text-stone-400'}`}
+          >
+            Schedule
+          </button>
+          <button
+            onClick={() => setMobileTab('inbox')}
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-1.5 ${mobileTab === 'inbox' ? 'border-accent-500 text-accent-600' : 'border-transparent text-stone-400'}`}
+          >
+            Inbox
+            {inboxCount > 0 && (
+              <span className="text-xs bg-accent-100 text-accent-600 font-semibold rounded-full px-1.5 py-0.5 leading-none">{inboxCount}</span>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile: Inbox tab */}
+        <div className={`flex-1 overflow-hidden flex flex-col ${mobileTab === 'inbox' ? 'flex' : 'hidden'}`}>
           <TaskInbox />
         </div>
 
-        {/* Calendar */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200 bg-white flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <button onClick={() => navigateDay(-1)} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors"><ChevronLeft size={18} /></button>
-                <button onClick={() => navigateDay(1)} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors"><ChevronRight size={18} /></button>
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-stone-800 leading-tight">{formatDateFull(selectedDate)}</h1>
-                {isToday && <span className="text-xs text-accent-500 font-medium">Today</span>}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {overlapWarnings.length > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
-                  <AlertTriangle size={13} />{overlapWarnings.length} overlap{overlapWarnings.length > 1 ? 's' : ''}
-                </div>
-              )}
-              <div className="flex items-center gap-1.5 text-sm text-stone-400">
-                <Clock size={14} />
-                <span>{Math.floor(totalMins / 60)}h {totalMins % 60 > 0 ? `${totalMins % 60}m` : ''} planned</span>
-              </div>
-              {!isToday && (
-                <button onClick={() => setSelectedDate(todayStr())} className="px-3 py-1.5 rounded-xl text-sm font-medium text-accent-600 bg-accent-50 hover:bg-accent-100 transition-colors">
-                  Today
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div ref={calendarRef} className="flex-1 overflow-y-auto scrollbar-thin">
-            <div className="flex">
-              <div className="w-16 flex-shrink-0 select-none">
-                {HOURS.map(({ hour, label }) => (
-                  <div key={hour} className="flex items-start justify-end pr-3" style={{ height: HOUR_HEIGHT_PX }}>
-                    <span className="text-xs text-stone-300 -mt-2">{label}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex-1 relative border-l border-stone-200 mr-4">
-                {HOURS.map(({ hour }) => (
-                  <div key={hour} className="absolute left-0 right-0 border-t border-stone-100" style={{ top: (hour - DAY_START_HOUR) * HOUR_HEIGHT_PX }} />
-                ))}
-                {HOURS.map(({ hour }) => (
-                  <div key={`h-${hour}`} className="absolute left-0 right-0 border-t border-stone-50 border-dashed" style={{ top: (hour - DAY_START_HOUR) * HOUR_HEIGHT_PX + HOUR_HEIGHT_PX / 2 }} />
-                ))}
-                <CurrentTimeIndicator date={selectedDate} />
-
-                <CalendarDropZone>
-                  {todayScheduled.map((task) => (
-                    <div key={task.id} data-task-block>
-                      <ScheduledTaskBlock task={task} hasOverlap={overlapIds.has(task.id)} onResizeStart={handleResizeStart} />
-                    </div>
-                  ))}
-                  <div className="absolute inset-0 z-0" onClick={handleCalendarClick} />
-                </CalendarDropZone>
-              </div>
-            </div>
-          </div>
+        {/* Mobile: Schedule tab */}
+        <div className={`flex-1 overflow-hidden flex flex-col ${mobileTab === 'schedule' ? 'flex' : 'hidden'}`}>
+          {CalendarPanel}
         </div>
+      </div>
+
+      {/* ── Desktop layout: inbox sidebar + calendar side-by-side ── */}
+      <div className="hidden md:flex h-full overflow-hidden flex-1">
+        <div className="w-72 flex-shrink-0 border-r border-stone-200 bg-white overflow-hidden flex flex-col">
+          <TaskInbox />
+        </div>
+        {CalendarPanel}
       </div>
 
       <DragOverlay dropAnimation={null}>

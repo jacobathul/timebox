@@ -49,7 +49,7 @@ export function ProjectDetailPage() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
       {/* Header */}
-      <div className="bg-white border-b border-stone-200 px-8 py-4 flex-shrink-0">
+      <div className="bg-white border-b border-stone-200 px-4 md:px-8 py-4 flex-shrink-0">
         <div className="max-w-3xl mx-auto">
           <Link to="/app/projects" className="flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-600 mb-3 transition-colors w-fit">
             <ArrowLeft size={14} />
@@ -59,7 +59,7 @@ export function ProjectDetailPage() {
             <div className="w-4 h-4 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: accentColor }} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl font-semibold text-stone-800">{project.name}</h1>
+                <h1 className="text-lg md:text-xl font-semibold text-stone-800 min-w-0">{project.name}</h1>
                 <ProjectStatusBadge status={project.status} />
               </div>
               {context && (
@@ -79,25 +79,25 @@ export function ProjectDetailPage() {
               )}
             </div>
             {/* Actions */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0 flex-wrap justify-end">
               <button onClick={() => setShowEdit(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-stone-600 border border-stone-200 hover:bg-stone-50 transition-colors">
-                <Pencil size={13} /> Edit
+                className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl text-sm font-medium text-stone-600 border border-stone-200 hover:bg-stone-50 transition-colors min-h-[44px] md:min-h-0">
+                <Pencil size={13} /> <span className="hidden sm:inline">Edit</span>
               </button>
               {project.status !== 'completed' && (
                 <button onClick={handleMarkComplete}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors">
-                  <CheckCircle2 size={13} /> Complete
+                  className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl text-sm font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors min-h-[44px] md:min-h-0">
+                  <CheckCircle2 size={13} /> <span className="hidden sm:inline">Complete</span>
                 </button>
               )}
               {project.status !== 'archived' && (
                 <button onClick={() => setShowConfirmArchive(true)}
-                  className="p-1.5 rounded-xl text-stone-400 border border-stone-200 hover:bg-stone-50 hover:text-stone-600 transition-colors" title="Archive">
+                  className="p-2 rounded-xl text-stone-400 border border-stone-200 hover:bg-stone-50 hover:text-stone-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center md:min-h-0 md:min-w-0" title="Archive">
                   <Archive size={15} />
                 </button>
               )}
               <button onClick={() => setShowConfirmDelete(true)}
-                className="p-1.5 rounded-xl text-red-400 border border-red-200 hover:bg-red-50 transition-colors" title="Delete">
+                className="p-2 rounded-xl text-red-400 border border-red-200 hover:bg-red-50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center md:min-h-0 md:min-w-0" title="Delete">
                 <Trash2 size={15} />
               </button>
             </div>
@@ -117,7 +117,7 @@ export function ProjectDetailPage() {
 
       {/* Task list */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-8 py-6">
+        <div className="max-w-3xl mx-auto px-4 md:px-8 py-4 md:py-6">
           <ProjectTaskList projectId={project.id} projectContextId={project.context_id} />
         </div>
       </div>

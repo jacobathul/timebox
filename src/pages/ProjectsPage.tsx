@@ -34,24 +34,24 @@ export function ProjectsPage() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
       {/* Header */}
-      <div className="bg-white border-b border-stone-200 px-8 py-5 flex-shrink-0">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-stone-800">Projects</h1>
-            <p className="text-sm text-stone-400 mt-0.5">Break big goals into tasks, track progress.</p>
+      <div className="bg-white border-b border-stone-200 px-4 md:px-8 py-4 md:py-5 flex-shrink-0">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg md:text-xl font-semibold text-stone-800">Projects</h1>
+            <p className="text-sm text-stone-400 mt-0.5 hidden sm:block">Break big goals into tasks, track progress.</p>
           </div>
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 transition-colors shadow-sm flex-shrink-0 min-h-[44px]"
           >
             <Plus size={15} />
-            New Project
+            <span>New Project</span>
           </button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-8 py-6 space-y-6">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 py-4 md:py-6 space-y-6">
           {/* Search */}
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />

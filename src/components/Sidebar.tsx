@@ -29,7 +29,7 @@ export function Sidebar() {
   const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
-    <aside className="w-56 flex-shrink-0 bg-white border-r border-stone-200 flex flex-col h-full">
+    <aside className="hidden md:flex w-56 flex-shrink-0 bg-white border-r border-stone-200 flex-col h-full">
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-accent-500 flex items-center justify-center">
