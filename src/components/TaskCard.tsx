@@ -6,6 +6,8 @@ import { useContextStore } from '../store/useContextStore';
 import { useProjectStore } from '../store/useProjectStore';
 import { useStore } from '../store/useStore';
 import { formatDuration } from '../utils/time';
+import { TimekeeperButton } from './TimekeeperButton';
+import { ManualTimeEntryDialog } from './ManualTimeEntryDialog';
 
 interface Props {
   task: Task;
@@ -40,6 +42,7 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
 
   const context = task.contextId ? getById(task.contextId) : undefined;
   const isCompleted = task.status === 'completed';
+  const [manualDialogOpen, setManualDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -107,6 +110,10 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
         )}
       </div>
 
+      {showActions && !isCompleted && (
+        <TimekeeperButton taskId={task.id} taskTitle={task.title} />
+      )}
+
       {showActions && (
         <div ref={menuRef} className="flex-shrink-0 relative" onClick={(e) => e.stopPropagation()}>
           <button
@@ -116,9 +123,12 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
             <MoreHorizontal size={14} />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-6 z-50 w-36 bg-white rounded-xl border border-stone-200 shadow-modal py-1">
+            <div className="absolute right-0 top-6 z-50 w-44 bg-white rounded-xl border border-stone-200 shadow-modal py-1">
               <button onClick={() => { openTaskModal(task); setMenuOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-stone-600 hover:bg-stone-50">
                 Edit
+              </button>
+              <button onClick={() => { setManualDialogOpen(true); setMenuOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-stone-600 hover:bg-stone-50">
+                Log time manually
               </button>
               <button onClick={() => { deleteTask(task.id); setMenuOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2">
                 <Trash2 size={13} />
@@ -127,6 +137,14 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
             </div>
           )}
         </div>
+      )}
+
+      {manualDialogOpen && (
+        <ManualTimeEntryDialog
+          taskId={task.id}
+          taskTitle={task.title}
+          onClose={() => setManualDialogOpen(false)}
+        />
       )}
     </div>
   );

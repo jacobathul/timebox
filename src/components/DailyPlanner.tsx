@@ -11,8 +11,10 @@ import { useDroppable } from '@dnd-kit/core';
 import { ChevronLeft, ChevronRight, Clock, AlertTriangle } from 'lucide-react';
 import { useTaskStore } from '../store/useTaskStore';
 import { useStore } from '../store/useStore';
+import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { TaskInbox } from './TaskInbox';
 import { ScheduledTaskBlock } from './ScheduledTaskBlock';
+import { ActualTimeBlock } from './ActualTimeBlock';
 import { TaskCard } from './TaskCard';
 import {
   getHourLabels,
@@ -24,7 +26,7 @@ import {
   formatDateFull,
   todayStr,
 } from '../utils/time';
-import type { Task } from '../types';
+import type { Task, TaskTimeEntry } from '../types';
 
 const HOURS = getHourLabels();
 const CALENDAR_HEIGHT = HOUR_HEIGHT_PX * (DAY_END_HOUR - DAY_START_HOUR + 1);
@@ -66,10 +68,23 @@ function CurrentTimeIndicator({ date }: { date: string }) {
 export function DailyPlanner() {
   const { tasks, scheduleTask, moveTask, resizeTask } = useTaskStore();
   const { selectedDate, setSelectedDate, openTaskModal } = useStore();
+  const { fetchTimeEntriesForDate, runningEntry } = useTimekeeperStore();
+  const [dayEntries, setDayEntries] = useState<TaskTimeEntry[]>([]);
 
   const calendarRef = useRef<HTMLDivElement>(null);
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const resizeRef = useRef<{ taskId: string; startY: number; startEndTime: string } | null>(null);
+
+  useEffect(() => {
+    fetchTimeEntriesForDate(selectedDate).then(setDayEntries);
+  }, [selectedDate, fetchTimeEntriesForDate]);
+
+  // Refresh actual blocks when running timer stops (entry gains an end time)
+  useEffect(() => {
+    if (!runningEntry) {
+      fetchTimeEntriesForDate(selectedDate).then(setDayEntries);
+    }
+  }, [runningEntry, selectedDate, fetchTimeEntriesForDate]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -210,6 +225,12 @@ export function DailyPlanner() {
                       <ScheduledTaskBlock task={task} hasOverlap={overlapIds.has(task.id)} onResizeStart={handleResizeStart} />
                     </div>
                   ))}
+                  {dayEntries.map((entry) => (
+                    <ActualTimeBlock key={entry.id} entry={entry} />
+                  ))}
+                  {runningEntry && !dayEntries.find((e) => e.id === runningEntry.id) && (
+                    <ActualTimeBlock key={runningEntry.id} entry={runningEntry} />
+                  )}
                   <div className="absolute inset-0 z-0" onClick={handleCalendarClick} />
                 </CalendarDropZone>
               </div>
