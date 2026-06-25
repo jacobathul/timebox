@@ -7,6 +7,7 @@ import { useContextStore } from '../store/useContextStore';
 import { useProjectStore } from '../store/useProjectStore';
 import { useStore } from '../store/useStore';
 import { timeToPixels, durationToPixels, timeToMinutes, formatTime } from '../utils/time';
+import { TimekeeperButton } from './TimekeeperButton';
 
 interface Props {
   task: Task;
@@ -99,6 +100,9 @@ export function ScheduledTaskBlock({ task, hasOverlap = false, onResizeStart }: 
         </div>
 
         {hasOverlap && <AlertTriangle size={12} className="text-amber-500 flex-shrink-0" />}
+        {!isCompleted && !isShort && (
+          <TimekeeperButton taskId={task.id} taskTitle={task.title} />
+        )}
       </div>
 
       {onResizeStart && (
