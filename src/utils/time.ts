@@ -116,6 +116,13 @@ export function getWeekStart(dateStr: string): string {
   return d.toISOString().split('T')[0];
 }
 
+/** Get the Sunday of the week containing the given date string */
+export function getWeekEnd(dateStr: string): string {
+  const d = new Date(getWeekStart(dateStr) + 'T00:00:00');
+  d.setDate(d.getDate() + 6);
+  return d.toISOString().split('T')[0];
+}
+
 /** Generate 7 date strings starting from Monday */
 export function getWeekDays(weekStart: string): string[] {
   const days: string[] = [];
@@ -125,6 +132,18 @@ export function getWeekDays(weekStart: string): string[] {
     d.setDate(d.getDate() + 1);
   }
   return days;
+}
+
+/** Format a week range like "Week of June 29 – July 5" */
+export function formatWeekRange(weekStartDate: string, weekEndDate: string): string {
+  const start = new Date(weekStartDate + 'T00:00:00');
+  const end = new Date(weekEndDate + 'T00:00:00');
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+  const startLabel = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  const endLabel = sameMonth
+    ? end.toLocaleDateString('en-US', { day: 'numeric' })
+    : end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  return `Week of ${startLabel} – ${endLabel}`;
 }
 
 /** Format "YYYY-MM-DD" to "Mon, Jun 24" */

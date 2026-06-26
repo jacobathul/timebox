@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Search, ChevronDown, ChevronRight, FolderKanban } from 'lucide-react';
 import { useProjectStore, computeProjectStats } from '../store/useProjectStore';
 import { useTaskStore } from '../store/useTaskStore';
+import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
 import { ProjectCard } from '../components/projects/ProjectCard';
 import { ProjectFormDialog } from '../components/projects/ProjectFormDialog';
 
@@ -10,6 +11,7 @@ export function ProjectsPage() {
   const navigate = useNavigate();
   const { projects, createProject } = useProjectStore();
   const tasks = useTaskStore((s) => s.tasks);
+  const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
 
   const [query, setQuery] = useState('');
   const [showCreate, setShowCreate] = useState(false);
@@ -89,6 +91,7 @@ export function ProjectsPage() {
                     key={p.id}
                     project={p}
                     onClick={() => navigate(`/app/projects/${p.id}`)}
+                    selectedForWeek={currentWeeklyPlan?.selected_project_ids.includes(p.id)}
                   />
                 ))}
               </div>
@@ -112,6 +115,7 @@ export function ProjectsPage() {
                       key={p.id}
                       project={p}
                       onClick={() => navigate(`/app/projects/${p.id}`)}
+                      selectedForWeek={currentWeeklyPlan?.selected_project_ids.includes(p.id)}
                     />
                   ))}
                 </div>
@@ -136,6 +140,7 @@ export function ProjectsPage() {
                       key={p.id}
                       project={p}
                       onClick={() => navigate(`/app/projects/${p.id}`)}
+                      selectedForWeek={currentWeeklyPlan?.selected_project_ids.includes(p.id)}
                     />
                   ))}
                 </div>

@@ -7,6 +7,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/app/today':             'Today',
   '/app/projects':          'Projects',
   '/app/week':              'Week',
+  '/app/weekly-planning':   'Plan Your Week',
   '/app/plan':              'Plan My Day',
   '/app/review':            'End of Day',
   '/app/settings/account':  'Settings',

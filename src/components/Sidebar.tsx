@@ -65,6 +65,7 @@ export function Sidebar() {
           New Task
           <span className="ml-auto text-accent-200 text-xs font-normal">N</span>
         </button>
+<<<<<<< HEAD
 
         {/* Command palette trigger */}
         <button
@@ -75,6 +76,14 @@ export function Sidebar() {
           <Search size={14} className="text-stone-400" />
           <span className="flex-1 text-left text-stone-400">Search…</span>
           <kbd className="text-xs text-stone-300 font-mono">{shortcut}</kbd>
+=======
+        <button
+          onClick={() => navigate('/app/weekly-planning')}
+          className="mt-2 w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 transition-colors"
+        >
+          <CalendarDays size={16} />
+          Plan Week
+>>>>>>> origin/main
         </button>
       </div>
 

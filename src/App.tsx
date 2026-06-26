@@ -24,6 +24,7 @@ function useKeyboardShortcuts() {
         case 'p': e.preventDefault(); navigate('/app/plan'); break;
         case 'r': e.preventDefault(); navigate('/app/review'); break;
         case 'd': e.preventDefault(); navigate('/app/today'); break;
+        case 'w': e.preventDefault(); navigate('/app/weekly-planning'); break;
       }
     }
     window.addEventListener('keydown', handleKeyDown);

@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 import { X, Moon, FolderTree, Settings, LogOut, Search } from 'lucide-react';
+=======
+import { X, Moon, FolderTree, Settings, LogOut, CalendarDays } from 'lucide-react';
+>>>>>>> origin/main
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUiStore } from '../store/useUiStore';
 
 const DRAWER_ITEMS = [
+  { path: '/app/weekly-planning',  label: 'Plan Week',   Icon: CalendarDays },
   { path: '/app/review',            label: 'End of Day', Icon: Moon },
   { path: '/app/settings/contexts', label: 'Contexts',   Icon: FolderTree },
   { path: '/app/settings/account',  label: 'Settings',   Icon: Settings },
