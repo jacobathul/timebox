@@ -2,6 +2,46 @@ export type Priority = 'low' | 'medium' | 'high';
 export type TaskStatus = 'inbox' | 'scheduled' | 'completed';
 export type AppView = 'daily' | 'weekly' | 'plan' | 'review';
 export type TimeEntryType = 'timer' | 'manual';
+export type WeeklyPlanStatus = 'draft' | 'planned' | 'completed' | 'archived';
+
+export interface WeeklyPriorityItem {
+  id: string;
+  text: string;
+  type: 'project' | 'task' | 'context' | 'custom';
+  projectId?: string | null;
+  taskId?: string | null;
+  contextId?: string | null;
+  completed?: boolean;
+}
+
+export interface DayPlan {
+  date: string;
+  focusProjectIds: string[];
+  focusTaskIds: string[];
+  focusContextIds: string[];
+  plannedMinutes: number;
+  notes?: string;
+}
+
+export interface WeeklyPlan {
+  id: string;
+  user_id: string;
+  week_start_date: string;
+  week_end_date: string;
+  status: WeeklyPlanStatus;
+  reflection_last_week: string | null;
+  weekly_intention: string | null;
+  weekly_capacity_minutes: number | null;
+  planned_minutes: number | null;
+  completed_minutes: number | null;
+  selected_project_ids: string[];
+  selected_context_ids: string[];
+  priority_items: WeeklyPriorityItem[];
+  day_plans: Record<string, DayPlan>;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+}
 
 export interface TaskTimeEntry {
   id: string;

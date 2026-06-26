@@ -4,6 +4,7 @@ import { ArrowLeft, Pencil, CheckCircle2, Archive, Trash2, Calendar } from 'luci
 import { useProjectStore, computeProjectStats } from '../store/useProjectStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { useContextStore } from '../store/useContextStore';
+import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
 import { ProjectProgressBar } from '../components/projects/ProjectProgressBar';
 import { ProjectStatusBadge } from '../components/projects/ProjectStatusBadge';
 import { ProjectFormDialog } from '../components/projects/ProjectFormDialog';
@@ -19,6 +20,7 @@ export function ProjectDetailPage() {
   const { projects, updateProject, deleteProject, markProjectComplete, archiveProject } = useProjectStore();
   const tasks = useTaskStore((s) => s.tasks);
   const contexts = useContextStore((s) => s.contexts);
+  const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
 
   const [showEdit, setShowEdit] = useState(false);
   const [showConfirmComplete, setShowConfirmComplete] = useState(false);
@@ -92,6 +94,17 @@ export function ProjectDetailPage() {
             </div>
             {/* Actions */}
             <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0 flex-wrap justify-end">
+              <button
+                onClick={() => navigate(`/app/weekly-planning?projectId=${project.id}`)}
+                className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl text-sm font-medium text-accent-600 border border-accent-200 hover:bg-accent-50 transition-colors min-h-[44px] md:min-h-0"
+              >
+                <Calendar size={13} /> <span className="hidden sm:inline">Plan this week</span>
+              </button>
+              {currentWeeklyPlan?.selected_project_ids.includes(project.id) && (
+                <span className="hidden sm:inline-flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium bg-accent-50 text-accent-600 border border-accent-200">
+                  Selected for this week
+                </span>
+              )}
               <button onClick={() => setShowEdit(true)}
                 className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl text-sm font-medium text-stone-600 border border-stone-200 hover:bg-stone-50 transition-colors min-h-[44px] md:min-h-0">
                 <Pencil size={13} /> <span className="hidden sm:inline">Edit</span>
