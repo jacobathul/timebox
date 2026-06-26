@@ -1,6 +1,7 @@
-import { Menu, Plus } from 'lucide-react';
+import { Menu, Plus, Search } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { useUiStore } from '../store/useUiStore';
 
 const PAGE_TITLES: Record<string, string> = {
   '/app/today':             'Today',
@@ -27,6 +28,7 @@ interface Props {
 export function MobileHeader({ onMenuOpen }: Props) {
   const { pathname } = useLocation();
   const { openTaskModal } = useStore();
+  const { openCommandPalette } = useUiStore();
   const title = getPageTitle(pathname);
 
   return (
@@ -43,6 +45,13 @@ export function MobileHeader({ onMenuOpen }: Props) {
           <Menu size={20} />
         </button>
         <span className="flex-1 font-semibold text-stone-800 text-base">Timebox</span>
+        <button
+          onClick={openCommandPalette}
+          className="p-2 rounded-xl text-stone-500 hover:bg-stone-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          aria-label="Open command palette"
+        >
+          <Search size={18} />
+        </button>
         <button
           onClick={() => openTaskModal()}
           className="p-2 rounded-xl bg-accent-500 text-white hover:bg-accent-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"

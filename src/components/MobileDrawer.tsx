@@ -1,6 +1,7 @@
-import { X, Moon, FolderTree, Settings, LogOut, CalendarDays } from 'lucide-react';
+import { X, Moon, FolderTree, Settings, LogOut, Search, CalendarDays } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { useUiStore } from '../store/useUiStore';
 
 const DRAWER_ITEMS = [
   { path: '/app/weekly-planning',  label: 'Plan Week',   Icon: CalendarDays },
@@ -18,6 +19,7 @@ export function MobileDrawer({ open, onClose }: Props) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user, profile, logout } = useAuthStore();
+  const { openCommandPalette } = useUiStore();
 
   const displayName = profile?.displayName ?? user?.email?.split('@')[0] ?? 'User';
   const initials = displayName.slice(0, 2).toUpperCase();
@@ -25,6 +27,12 @@ export function MobileDrawer({ open, onClose }: Props) {
   function navTo(path: string) {
     navigate(path);
     onClose();
+  }
+
+  function openPalette() {
+    onClose();
+    // Small delay so drawer animates closed before palette opens
+    setTimeout(openCommandPalette, 150);
   }
 
   return (
@@ -60,8 +68,20 @@ export function MobileDrawer({ open, onClose }: Props) {
           </button>
         </div>
 
+        {/* Command palette shortcut */}
+        <div className="px-3 pt-3 pb-1">
+          <button
+            onClick={openPalette}
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 transition-colors min-h-[44px] border border-stone-200"
+          >
+            <Search size={16} className="text-stone-400" />
+            <span className="flex-1 text-left text-stone-400">Command Palette…</span>
+            <span className="text-xs text-stone-300">⌘K</span>
+          </button>
+        </div>
+
         {/* Nav items */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
           {DRAWER_ITEMS.map(({ path, label, Icon }) => {
             const active = pathname === path;
             return (

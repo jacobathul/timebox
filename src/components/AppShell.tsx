@@ -11,8 +11,11 @@ import { WeeklyView } from './WeeklyView';
 import { WeeklyPlanningPage } from './weekly-planning/WeeklyPlanningPage';
 import { TaskModal } from './TaskModal';
 import { MigrationDialog } from './MigrationDialog';
+import { GlobalModals } from './GlobalModals';
 import { ToastContainer } from './ui/Toast';
 import { OfflineBanner } from './ui/OfflineBanner';
+import { CommandPaletteProvider } from './command-palette/CommandPaletteProvider';
+import { CommandPalette } from './command-palette/CommandPalette';
 import { collectMigratableTasks } from '../services/migration.service';
 import { useAuthStore } from '../store/useAuthStore';
 import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
@@ -46,64 +49,68 @@ export function AppShell() {
   }, [user, migrationChecked]);
 
   return (
-    <>
-      <OfflineBanner />
+    <CommandPaletteProvider>
+      <>
+        <OfflineBanner />
 
-      {/*
-        Unified responsive layout:
-        - Mobile (<md):  flex column — MobileHeader / content / bottom-nav spacer
-        - Desktop (md+): flex row    — Sidebar / content side-by-side
-        Single <Routes> renders once; chrome toggles via Tailwind classes.
-      */}
-      <div className="flex flex-col h-dvh md:flex-row bg-surface-50 overflow-hidden">
-        {/* Desktop sidebar — hidden on mobile */}
-        <Sidebar />
+        {/*
+          Unified responsive layout:
+          - Mobile (<md):  flex column — MobileHeader / content / bottom-nav spacer
+          - Desktop (md+): flex row    — Sidebar / content side-by-side
+          Single <Routes> renders once; chrome toggles via Tailwind classes.
+        */}
+        <div className="flex flex-col h-dvh md:flex-row bg-surface-50 overflow-hidden">
+          {/* Desktop sidebar — hidden on mobile */}
+          <Sidebar />
 
-        {/* Main content column */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Mobile header — hidden on desktop */}
-          <MobileHeader onMenuOpen={() => setDrawerOpen(true)} />
+          {/* Main content column */}
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            {/* Mobile header — hidden on desktop */}
+            <MobileHeader onMenuOpen={() => setDrawerOpen(true)} />
 
-          {/* Page content — shared by both layouts */}
-          <div className="flex-1 flex min-w-0 overflow-hidden">
-            <Routes>
-              <Route path="today"             element={<DailyPlanner />} />
-              <Route path="projects"          element={<ProjectsPage />} />
-              <Route path="projects/:id"      element={<ProjectDetailPage />} />
-              <Route path="week"              element={<WeeklyView />} />
-              <Route path="weekly-planning"   element={<WeeklyPlanningPage />} />
-              <Route path="plan"              element={<PlanMyDayFlow />} />
-              <Route path="review"            element={<EndOfDayReview />} />
-              <Route path="settings/account"  element={<AccountSettingsPage />} />
-              <Route path="settings/contexts" element={<AccountSettingsPage initialTab="contexts" />} />
-              <Route path="settings"          element={<Navigate to="account" replace />} />
-              <Route path="*"                 element={<Navigate to="today" replace />} />
-            </Routes>
+            {/* Page content — shared by both layouts */}
+            <div className="flex-1 flex min-w-0 overflow-hidden">
+              <Routes>
+                <Route path="today"             element={<DailyPlanner />} />
+                <Route path="projects"          element={<ProjectsPage />} />
+                <Route path="projects/:id"      element={<ProjectDetailPage />} />
+                <Route path="week"              element={<WeeklyView />} />
+                <Route path="weekly-planning"   element={<WeeklyPlanningPage />} />
+                <Route path="plan"              element={<PlanMyDayFlow />} />
+                <Route path="review"            element={<EndOfDayReview />} />
+                <Route path="settings/account"  element={<AccountSettingsPage />} />
+                <Route path="settings/contexts" element={<AccountSettingsPage initialTab="contexts" />} />
+                <Route path="settings"          element={<Navigate to="account" replace />} />
+                <Route path="*"                 element={<Navigate to="today" replace />} />
+              </Routes>
+            </div>
+
+            {/* Spacer so content isn't hidden under the fixed mobile bottom nav */}
+            <div
+              className="md:hidden flex-shrink-0"
+              style={{ height: 'calc(56px + env(safe-area-inset-bottom))' }}
+            />
           </div>
-
-          {/* Spacer so content isn't hidden under the fixed mobile bottom nav */}
-          <div
-            className="md:hidden flex-shrink-0"
-            style={{ height: 'calc(56px + env(safe-area-inset-bottom))' }}
-          />
         </div>
-      </div>
 
-      {/* Fixed mobile bottom nav — outside overflow-hidden container */}
-      <MobileBottomNav onMoreOpen={() => setDrawerOpen(true)} />
+        {/* Fixed mobile bottom nav — outside overflow-hidden container */}
+        <MobileBottomNav onMoreOpen={() => setDrawerOpen(true)} />
 
-      {/* Slide-out drawer */}
-      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+        {/* Slide-out drawer */}
+        <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      <TaskModal />
-      <ToastContainer />
+        <TaskModal />
+        <GlobalModals />
+        <CommandPalette />
+        <ToastContainer />
 
-      {migrationTasks.length > 0 && (
-        <MigrationDialog
-          tasks={migrationTasks}
-          onDismiss={() => setMigrationTasks([])}
-        />
-      )}
-    </>
+        {migrationTasks.length > 0 && (
+          <MigrationDialog
+            tasks={migrationTasks}
+            onDismiss={() => setMigrationTasks([])}
+          />
+        )}
+      </>
+    </CommandPaletteProvider>
   );
 }
