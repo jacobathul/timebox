@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LayoutGrid, CheckCircle2, Clock } from 'lucide-react';
 import { useTaskStore } from '../store/useTaskStore';
 import { useStore } from '../store/useStore';
-import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
+import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
 import {
   todayStr,
   getWeekStart,
@@ -10,6 +12,7 @@ import {
   formatDate,
   formatDateFull,
 } from '../utils/time';
+import { WeeklyPlanSummaryCard } from './weekly-planning/WeeklyPlanningPage';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -17,6 +20,9 @@ export function WeeklyView() {
   const { tasks } = useTaskStore();
   const { setSelectedDate, setView } = useStore();
   const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
+  const { fetchWeeklyPlan } = useWeeklyPlanStore();
+  const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
+  const navigate = useNavigate();
   const today = todayStr();
   const [weekStart, setWeekStart] = useState(() => getWeekStart(today));
   const [mobileDay, setMobileDay] = useState(today);
@@ -51,6 +57,10 @@ export function WeeklyView() {
   const mobileDayTasks = tasks.filter((t) => t.scheduledDate === mobileDay && t.startTime);
   const mobileDayInbox = tasks.filter((t) => t.scheduledDate === mobileDay && !t.startTime);
 
+  useEffect(() => {
+    void fetchWeeklyPlan(weekStart);
+  }, [fetchWeeklyPlan, weekStart]);
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
 
@@ -70,9 +80,31 @@ export function WeeklyView() {
             <button onClick={() => { setWeekStart(getWeekStart(today)); setMobileDay(today); }} className="ml-1 px-3 py-1.5 rounded-xl text-sm text-stone-500 hover:bg-stone-100 transition-colors hidden md:block">
               This week
             </button>
+            <button onClick={() => navigate('/app/weekly-planning')} className="ml-1 px-3 py-1.5 rounded-xl text-sm bg-accent-50 text-accent-600 hover:bg-accent-100 transition-colors hidden md:block">
+              Plan Week
+            </button>
           </div>
         </div>
       </div>
+
+      {currentWeeklyPlan?.week_start_date === weekStart && (
+        <div className="px-4 md:px-6 py-4">
+          <div className="max-w-5xl mx-auto space-y-3">
+            <WeeklyPlanSummaryCard
+              plan={currentWeeklyPlan}
+              selectedTaskCount={currentWeeklyPlan.priority_items.filter((item) => item.type === 'task').length}
+              weeklyCapacityMinutes={currentWeeklyPlan.weekly_capacity_minutes ?? 20 * 60}
+            />
+            <button
+              type="button"
+              onClick={() => navigate('/app/weekly-planning')}
+              className="px-4 py-2 rounded-xl bg-accent-500 text-white text-sm font-medium"
+            >
+              Edit Weekly Plan
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Mobile layout: horizontal day strip + single-day task list ── */}
       <div className="flex md:hidden flex-col flex-1 overflow-hidden">

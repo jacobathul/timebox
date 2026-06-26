@@ -1,11 +1,24 @@
 import type React from 'react';
-import { CalendarDays, LayoutGrid, PlayCircle, Moon, Plus, Settings, LogOut, FolderTree, FolderKanban } from 'lucide-react';
+import {
+  CalendarDays,
+  LayoutGrid,
+  PlayCircle,
+  Moon,
+  Plus,
+  Settings,
+  LogOut,
+  FolderTree,
+  FolderKanban,
+  Search,
+} from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { useUiStore } from '../store/useUiStore';
 import { RunningTimerBadge } from './RunningTimerBadge';
 import { formatDate, todayStr } from '../utils/time';
+import { getCommandPaletteShortcut } from './command-palette/CommandPaletteProvider';
 
 const NAV_ITEMS: { path: string; label: string; icon: React.ReactNode; shortcut?: string }[] = [
   { path: '/app/today',    label: 'Today',       icon: <CalendarDays size={18} />, shortcut: 'D' },
@@ -19,6 +32,7 @@ export function Sidebar() {
   const { openTaskModal } = useStore();
   const { tasks } = useTaskStore();
   const { user, profile, logout } = useAuthStore();
+  const { openCommandPalette } = useUiStore();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -28,6 +42,7 @@ export function Sidebar() {
 
   const displayName = profile?.displayName ?? user?.email?.split('@')[0] ?? 'User';
   const initials = displayName.slice(0, 2).toUpperCase();
+  const shortcut = getCommandPaletteShortcut();
 
   return (
     <aside className="hidden md:flex w-56 flex-shrink-0 bg-white border-r border-stone-200 flex-col h-full">
@@ -41,7 +56,7 @@ export function Sidebar() {
         <p className="text-xs text-stone-400 mt-1">{todayLabel}</p>
       </div>
 
-      <div className="px-3 mb-4">
+      <div className="px-3 mb-2 space-y-1.5">
         <button
           onClick={() => openTaskModal()}
           className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 transition-colors shadow-sm"
@@ -50,10 +65,28 @@ export function Sidebar() {
           New Task
           <span className="ml-auto text-accent-200 text-xs font-normal">N</span>
         </button>
+
+        {/* Command palette trigger */}
+        <button
+          onClick={openCommandPalette}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-50 text-stone-500 text-sm hover:bg-stone-100 hover:text-stone-700 transition-colors border border-stone-200"
+          title="Open command palette"
+        >
+          <Search size={14} className="text-stone-400" />
+          <span className="flex-1 text-left text-stone-400">Search…</span>
+          <kbd className="text-xs text-stone-300 font-mono">{shortcut}</kbd>
+        </button>
+        <button
+          onClick={() => navigate('/app/weekly-planning')}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 transition-colors"
+        >
+          <CalendarDays size={16} />
+          Plan Week
+        </button>
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
-        {NAV_ITEMS.map(({ path, label, icon, shortcut }) => {
+        {NAV_ITEMS.map(({ path, label, icon, shortcut: navShortcut }) => {
           const active = pathname === path || pathname.startsWith(path + '/');
           return (
             <button
@@ -68,8 +101,8 @@ export function Sidebar() {
               {path === '/app/today' && inboxCount > 0 && (
                 <span className="ml-auto bg-accent-100 text-accent-600 text-xs font-semibold rounded-full px-2 py-0.5">{inboxCount}</span>
               )}
-              {shortcut && !active && (
-                <span className="ml-auto text-stone-300 text-xs">{shortcut}</span>
+              {navShortcut && !active && (
+                <span className="ml-auto text-stone-300 text-xs">{navShortcut}</span>
               )}
             </button>
           );

@@ -13,6 +13,7 @@ import { useTaskStore } from '../store/useTaskStore';
 import { useStore } from '../store/useStore';
 import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
+import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
 import { TaskInbox } from './TaskInbox';
 import { ScheduledTaskBlock } from './ScheduledTaskBlock';
 import { ActualTimeBlock } from './ActualTimeBlock';
@@ -28,6 +29,7 @@ import {
   todayStr,
 } from '../utils/time';
 import type { Task, TaskTimeEntry } from '../types';
+import { WeeklyPlanCard } from './weekly-planning/WeeklyPlanningPage';
 
 const HOURS = getHourLabels();
 const CALENDAR_HEIGHT = HOUR_HEIGHT_PX * (DAY_END_HOUR - DAY_START_HOUR + 1);
@@ -71,6 +73,7 @@ export function DailyPlanner() {
   const { selectedDate, setSelectedDate, openTaskModal } = useStore();
   const { fetchTimeEntriesForDate, runningEntry } = useTimekeeperStore();
   const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
+  const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
   const [dayEntries, setDayEntries] = useState<TaskTimeEntry[]>([]);
 
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -168,6 +171,7 @@ export function DailyPlanner() {
   }
 
   const isToday = selectedDate === todayStr();
+  const weeklyPlanDay = currentWeeklyPlan?.day_plans[selectedDate];
 
   /* Shared calendar panel (used in both mobile schedule tab and desktop) */
   const CalendarPanel = (
@@ -202,6 +206,15 @@ export function DailyPlanner() {
           )}
         </div>
       </div>
+
+      {currentWeeklyPlan && selectedDate === todayStr() && (
+        <div className="px-4 md:px-6 py-3 bg-surface-50">
+          <WeeklyPlanCard plan={currentWeeklyPlan} today={selectedDate} todayLabel="Today’s weekly focus" />
+          {weeklyPlanDay && weeklyPlanDay.focusTaskIds.length > 0 && (
+            <p className="mt-2 text-sm text-stone-500">Today’s planned focus: {weeklyPlanDay.focusTaskIds.length} task{weeklyPlanDay.focusTaskIds.length !== 1 ? 's' : ''}</p>
+          )}
+        </div>
+      )}
 
       {/* Calendar grid */}
       <div ref={calendarRef} className="flex-1 overflow-y-auto scrollbar-thin">

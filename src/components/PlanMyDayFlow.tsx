@@ -4,7 +4,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTaskStore } from '../store/useTaskStore';
 import { useProjectStore } from '../store/useProjectStore';
 import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
+import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
 import { todayStr, formatDuration } from '../utils/time';
+import { useEffect } from 'react';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -20,6 +22,7 @@ export function PlanMyDayFlow() {
   const { tasks, scheduleTask, updateTask } = useTaskStore();
   const projects = useProjectStore((s) => s.projects);
   const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
+  const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const today = todayStr();
@@ -32,11 +35,12 @@ export function PlanMyDayFlow() {
 
   const [step, setStep] = useState<Step>(() => (preselectedProjectId ? 2 : 1));
   const [selectedProjectIds, setSelectedProjectIds] = useState<Set<string>>(() =>
-    preselectedProjectId ? new Set([preselectedProjectId]) : new Set(),
+    preselectedProjectId ? new Set([preselectedProjectId]) : new Set(currentWeeklyPlan?.selected_project_ids ?? []),
   );
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
   const [estimates, setEstimates] = useState<Record<string, number>>({});
   const [startTimes, setStartTimes] = useState<Record<string, string>>({});
+  const [initializedFromWeeklyPlan, setInitializedFromWeeklyPlan] = useState(false);
 
   const activeProjects = useMemo(() => projects.filter((p) => p.status === 'active'), [projects]);
 
@@ -59,6 +63,18 @@ export function PlanMyDayFlow() {
     () => selectedTasks.reduce((acc, t) => acc + (estimates[t.id] ?? t.estimatedMinutes), 0),
     [selectedTasks, estimates],
   );
+
+  const todayWeeklyPlan = currentWeeklyPlan?.day_plans[today];
+
+  useEffect(() => {
+    if (!currentWeeklyPlan || initializedFromWeeklyPlan) return;
+    setSelectedProjectIds((prev) => (prev.size > 0 ? prev : new Set(currentWeeklyPlan.selected_project_ids)));
+    setSelectedTaskIds((prev) => {
+      if (prev.size > 0) return prev;
+      return new Set(todayWeeklyPlan?.focusTaskIds ?? currentWeeklyPlan.priority_items.filter((item) => item.type === 'task').map((item) => item.taskId).filter(Boolean) as string[]);
+    });
+    setInitializedFromWeeklyPlan(true);
+  }, [currentWeeklyPlan, initializedFromWeeklyPlan, todayWeeklyPlan]);
 
   function toggleProject(id: string) {
     setSelectedProjectIds((prev) => {
@@ -138,6 +154,14 @@ export function PlanMyDayFlow() {
 
       <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 md:py-6">
         <div className="max-w-2xl mx-auto">
+          {currentWeeklyPlan && (
+            <div className="mb-4 rounded-2xl border border-accent-200 bg-accent-50 p-4">
+              <p className="text-xs uppercase tracking-wide text-accent-500 font-medium">From Weekly Plan</p>
+              <p className="text-sm text-stone-700 mt-1">
+                {currentWeeklyPlan.weekly_intention ?? 'Weekly plan ready'} · {todayWeeklyPlan?.focusTaskIds.length ?? 0} planned task{(todayWeeklyPlan?.focusTaskIds.length ?? 0) === 1 ? '' : 's'} for today
+              </p>
+            </div>
+          )}
 
           {/* Step 1: Pick Projects */}
           {step === 1 && (

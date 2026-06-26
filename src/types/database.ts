@@ -1,6 +1,8 @@
 // Mirror of the Supabase DB schema (snake_case).
 // These are used only in the service layer; the rest of the app uses the camelCase types in index.ts.
 
+import type { DayPlan, WeeklyPlanStatus, WeeklyPriorityItem } from './index';
+
 export interface DbContext {
   id: string;
   user_id: string;
@@ -83,6 +85,27 @@ export interface DbDailyReview {
   unfinished_task_ids: string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface DbWeeklyPlan {
+  id: string;
+  user_id: string;
+  week_start_date: string;
+  week_end_date: string;
+  status: WeeklyPlanStatus;
+  reflection_last_week: string | null;
+  weekly_intention: string | null;
+  weekly_capacity_minutes: number | null;
+  planned_minutes: number | null;
+  completed_minutes: number | null;
+  selected_project_ids: string[];
+  selected_context_ids: string[];
+  priority_items: WeeklyPriorityItem[];
+  day_plans: Record<string, DayPlan>;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+  weekly_review_reflection: string | null;
 }
 
 export interface DbProfile {
