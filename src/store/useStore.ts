@@ -30,7 +30,11 @@ export const useStore = create<UIState>()(
 
       setView: (view) => set({ currentView: view }),
       setSelectedDate: (date) => set({ selectedDate: date }),
-      openTaskModal: (initial) => set({ isTaskModalOpen: true, taskModalInitial: initial ?? null }),
+      openTaskModal: (initial) => set({
+        isTaskModalOpen: true,
+        taskModalInitial: initial ?? null,
+        activeTaskId: initial?.id ?? null,
+      }),
       closeTaskModal: () => set({ isTaskModalOpen: false, taskModalInitial: null }),
       setActiveTask: (id) => set({ activeTaskId: id }),
     }),
