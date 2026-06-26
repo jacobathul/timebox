@@ -11,6 +11,15 @@ function isGuestTask(task: Task): boolean {
   return !isUuidLike(task.id);
 }
 
+function normalizeTask(task: Task): Task {
+  return {
+    ...task,
+    recurringTemplateId: task.recurringTemplateId ?? null,
+    recurrenceInstanceDate: task.recurrenceInstanceDate ?? null,
+    recurrenceStatus: task.recurrenceStatus ?? null,
+  };
+}
+
 /**
  * Read tasks and projects from the old localStorage format.
  * Returns null if nothing to migrate.
@@ -23,7 +32,7 @@ export function getLocalGuestData(): { tasks: Task[]; projects: Project[] } | nu
     const tasks: Task[] = parsed?.state?.tasks ?? [];
     const projects: Project[] = parsed?.state?.projects ?? [];
     // Filter out the demo tasks (their IDs start with "demo-")
-    const realTasks = tasks.filter((t) => !t.id.startsWith('demo-') && isGuestTask(t));
+    const realTasks = tasks.filter((t) => !t.id.startsWith('demo-') && isGuestTask(t)).map(normalizeTask);
     if (realTasks.length === 0) return null;
     return { tasks: realTasks, projects };
   } catch {
@@ -38,7 +47,7 @@ export function getNewFormatGuestTasks(): Task[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     const tasks: Task[] = parsed?.state?.tasks ?? [];
-    return tasks.filter((t) => !t.id.startsWith('demo-') && isGuestTask(t));
+    return tasks.filter((t) => !t.id.startsWith('demo-') && isGuestTask(t)).map(normalizeTask);
   } catch {
     return [];
   }

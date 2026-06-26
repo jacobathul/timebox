@@ -17,6 +17,9 @@ function dbToTask(db: DbTask): Task {
     startTime: db.start_time,
     endTime: db.end_time,
     completedAt: db.completed_at,
+    recurringTemplateId: db.recurring_template_id,
+    recurrenceInstanceDate: db.recurrence_instance_date,
+    recurrenceStatus: db.recurrence_status,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
   };
@@ -37,6 +40,9 @@ function taskToInsert(task: Task, userId: string) {
     start_time: task.startTime,
     end_time: task.endTime,
     completed_at: task.completedAt,
+    recurring_template_id: task.recurringTemplateId,
+    recurrence_instance_date: task.recurrenceInstanceDate,
+    recurrence_status: task.recurrenceStatus,
   };
 
   return insert;
@@ -90,6 +96,9 @@ export const taskService = {
     if (updates.startTime !== undefined)      patch.start_time = updates.startTime;
     if (updates.endTime !== undefined)        patch.end_time = updates.endTime;
     if (updates.completedAt !== undefined)    patch.completed_at = updates.completedAt;
+    if (updates.recurringTemplateId !== undefined) patch.recurring_template_id = updates.recurringTemplateId;
+    if (updates.recurrenceInstanceDate !== undefined) patch.recurrence_instance_date = updates.recurrenceInstanceDate;
+    if (updates.recurrenceStatus !== undefined) patch.recurrence_status = updates.recurrenceStatus;
 
     const { error } = await supabase
       .from('tasks')

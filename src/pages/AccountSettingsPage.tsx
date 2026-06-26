@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, FolderTree } from 'lucide-react';
+import { ArrowLeft, User, FolderTree, RefreshCw } from 'lucide-react';
 import { AccountSettings } from '../components/settings/AccountSettings';
 import { ContextSettings } from '../components/contexts/ContextSettings';
+import { RecurringTasksSettingsPage } from './RecurringTasksSettingsPage';
 
-type Tab = 'account' | 'contexts';
+type Tab = 'account' | 'contexts' | 'recurring';
 
 interface Props {
   initialTab?: Tab;
@@ -13,6 +14,7 @@ interface Props {
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'account',  label: 'Account',  icon: <User size={15} /> },
   { id: 'contexts', label: 'Contexts', icon: <FolderTree size={15} /> },
+  { id: 'recurring', label: 'Recurring', icon: <RefreshCw size={15} /> },
 ];
 
 export function AccountSettingsPage({ initialTab = 'account' }: Props) {
@@ -77,6 +79,7 @@ export function AccountSettingsPage({ initialTab = 'account' }: Props) {
         <div className="flex-1 overflow-y-auto pb-8 min-w-0">
           {tab === 'account'  && <AccountSettings />}
           {tab === 'contexts' && <ContextSettings />}
+          {tab === 'recurring' && <RecurringTasksSettingsPage />}
         </div>
       </div>
     </div>

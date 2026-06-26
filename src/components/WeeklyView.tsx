@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LayoutGrid, CheckCircle2, Clock } from 'lucide-react';
 import { useTaskStore } from '../store/useTaskStore';
@@ -18,6 +19,7 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 export function WeeklyView() {
   const { tasks } = useTaskStore();
   const { setSelectedDate, setView } = useStore();
+  const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
   const { fetchWeeklyPlan } = useWeeklyPlanStore();
   const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
   const navigate = useNavigate();
@@ -25,6 +27,11 @@ export function WeeklyView() {
   const [weekStart, setWeekStart] = useState(() => getWeekStart(today));
   const [mobileDay, setMobileDay] = useState(today);
   const weekDays = getWeekDays(weekStart);
+  const weekEnd = weekDays[6];
+
+  useEffect(() => {
+    void ensureRecurringTasksGeneratedThrough(weekEnd);
+  }, [weekEnd, ensureRecurringTasksGeneratedThrough]);
 
   function goToDay(date: string) {
     setSelectedDate(date);

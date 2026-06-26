@@ -5,6 +5,7 @@ import { useTaskStore } from '../../store/useTaskStore';
 import { useContextStore } from '../../store/useContextStore';
 import { useProjectStore } from '../../store/useProjectStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useRecurringTaskStore } from '../../store/useRecurringTaskStore';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             useContextStore.getState().fetchContexts(),
             useProjectStore.getState().fetchProjects(),
             useSettingsStore.getState().fetchSettings(),
+            useRecurringTaskStore.getState().fetchRecurringTemplates(),
           ]);
           await refreshProfile();
           _setProfile(useAuthStore.getState().profile);

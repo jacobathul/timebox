@@ -12,6 +12,7 @@ import { ChevronLeft, ChevronRight, Clock, AlertTriangle } from 'lucide-react';
 import { useTaskStore } from '../store/useTaskStore';
 import { useStore } from '../store/useStore';
 import { useTimekeeperStore } from '../store/useTimekeeperStore';
+import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
 import { TaskInbox } from './TaskInbox';
 import { ScheduledTaskBlock } from './ScheduledTaskBlock';
@@ -71,6 +72,7 @@ export function DailyPlanner() {
   const { tasks, scheduleTask, moveTask, resizeTask } = useTaskStore();
   const { selectedDate, setSelectedDate, openTaskModal } = useStore();
   const { fetchTimeEntriesForDate, runningEntry } = useTimekeeperStore();
+  const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
   const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
   const [dayEntries, setDayEntries] = useState<TaskTimeEntry[]>([]);
 
@@ -82,6 +84,10 @@ export function DailyPlanner() {
   useEffect(() => {
     fetchTimeEntriesForDate(selectedDate).then(setDayEntries);
   }, [selectedDate, fetchTimeEntriesForDate]);
+
+  useEffect(() => {
+    void ensureRecurringTasksGeneratedThrough(selectedDate);
+  }, [selectedDate, ensureRecurringTasksGeneratedThrough]);
 
   // Refresh actual blocks when running timer stops (entry gains an end time)
   useEffect(() => {
