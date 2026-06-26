@@ -68,7 +68,6 @@ export function AppShell() {
             {/* Mobile header — hidden on desktop */}
             <MobileHeader onMenuOpen={() => setDrawerOpen(true)} />
 
-<<<<<<< HEAD
             {/* Page content — shared by both layouts */}
             <div className="flex-1 flex min-w-0 overflow-hidden">
               <Routes>
@@ -76,6 +75,7 @@ export function AppShell() {
                 <Route path="projects"          element={<ProjectsPage />} />
                 <Route path="projects/:id"      element={<ProjectDetailPage />} />
                 <Route path="week"              element={<WeeklyView />} />
+                <Route path="weekly-planning"   element={<WeeklyPlanningPage />} />
                 <Route path="plan"              element={<PlanMyDayFlow />} />
                 <Route path="review"            element={<EndOfDayReview />} />
                 <Route path="settings/account"  element={<AccountSettingsPage />} />
@@ -90,23 +90,6 @@ export function AppShell() {
               className="md:hidden flex-shrink-0"
               style={{ height: 'calc(56px + env(safe-area-inset-bottom))' }}
             />
-=======
-          {/* Page content — shared by both layouts */}
-          <div className="flex-1 flex min-w-0 overflow-hidden">
-            <Routes>
-              <Route path="today"             element={<DailyPlanner />} />
-              <Route path="projects"          element={<ProjectsPage />} />
-              <Route path="projects/:id"      element={<ProjectDetailPage />} />
-              <Route path="week"              element={<WeeklyView />} />
-              <Route path="weekly-planning"   element={<WeeklyPlanningPage />} />
-              <Route path="plan"              element={<PlanMyDayFlow />} />
-              <Route path="review"            element={<EndOfDayReview />} />
-              <Route path="settings/account"  element={<AccountSettingsPage />} />
-              <Route path="settings/contexts" element={<AccountSettingsPage initialTab="contexts" />} />
-              <Route path="settings"          element={<Navigate to="account" replace />} />
-              <Route path="*"                 element={<Navigate to="today" replace />} />
-            </Routes>
->>>>>>> origin/main
           </div>
         </div>
 

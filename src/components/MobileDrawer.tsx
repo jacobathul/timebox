@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { X, Moon, FolderTree, Settings, LogOut, Search } from 'lucide-react';
-=======
-import { X, Moon, FolderTree, Settings, LogOut, CalendarDays } from 'lucide-react';
->>>>>>> origin/main
+import { X, Moon, FolderTree, Settings, LogOut, Search, CalendarDays } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUiStore } from '../store/useUiStore';
