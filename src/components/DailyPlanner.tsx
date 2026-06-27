@@ -249,7 +249,8 @@ export function DailyPlanner() {
               {/* Google Calendar read-only event blocks */}
               {calendarEvents
                 .filter((e) => {
-                  const eventDate = new Date(e.startTime).toISOString().split('T')[0];
+                  const d = new Date(e.startTime);
+                  const eventDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                   return eventDate === selectedDate && !e.isAllDay;
                 })
                 .map((event) => (

@@ -57,7 +57,11 @@ export async function listCalendarEvents(
   const res = await fetch(`${BASE_URL}/calendars/${encodeURIComponent(calId)}/events?${params}`, {
     headers: authHeader(accessToken),
   });
-  if (!res.ok) throw new Error(`Google Calendar list failed: ${res.statusText}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const msg = (body as { error?: { message?: string } })?.error?.message ?? res.statusText;
+    throw new Error(`Google Calendar API error ${res.status}: ${msg}`);
+  }
 
   const data = (await res.json()) as GCalListResponse;
   return (data.items ?? []).map((e) => parseGCalEvent(e, options.calendarName));

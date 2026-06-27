@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { startGoogleOAuth, exchangeCodeForTokens, fetchGoogleUserInfo, refreshAccessToken } from '../integrations/google/googleAuth';
+import { requestGoogleToken, fetchGoogleUserInfo } from '../integrations/google/googleAuth';
 import { fetchRecentEmails } from '../integrations/google/gmailClient';
 import { fetchEventsForRange } from '../integrations/google/googleCalendarClient';
 import { connectedAccountsService } from '../services/connectedAccounts.service';
@@ -18,29 +18,23 @@ function toast() {
 
 function isTokenExpired(expiresAt: string | null): boolean {
   if (!expiresAt) return true;
-  // Refresh 5 minutes early
   return Date.now() >= new Date(expiresAt).getTime() - 5 * 60 * 1000;
 }
 
 interface GoogleIntegrationState {
-  // Connection state
   connectedAccount: ConnectedAccount | null;
   loadingConnection: boolean;
 
-  // Gmail state
   emails: ParsedEmail[];
   loadingEmails: boolean;
   emailQuery: string;
 
-  // Calendar state
   calendarEvents: GoogleCalendarEvent[];
   loadingCalendar: boolean;
 
-  // Actions
   fetchConnection: () => Promise<void>;
   connectGoogle: () => Promise<void>;
   disconnectGoogle: () => Promise<void>;
-  handleOAuthCallback: (code: string, state: string) => Promise<void>;
   getValidAccessToken: () => Promise<string | null>;
 
   fetchEmails: (query?: string) => Promise<void>;
@@ -66,14 +60,42 @@ export const useGoogleIntegrationStore = create<GoogleIntegrationState>()((set, 
       const account = await connectedAccountsService.fetchByProvider(uid, 'google');
       set({ connectedAccount: account });
     } catch {
-      // silent — user may not have a connected account
+      // silent
     } finally {
       set({ loadingConnection: false });
     }
   },
 
   connectGoogle: async () => {
-    await startGoogleOAuth();
+    const uid = getUserId();
+    if (!uid) return;
+    set({ loadingConnection: true });
+    try {
+      const { accessToken, expiresIn } = await requestGoogleToken('consent');
+      const userInfo = await fetchGoogleUserInfo(accessToken);
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+      const account = await connectedAccountsService.upsert(uid, {
+        provider: 'google',
+        providerAccountId: userInfo.sub,
+        email: userInfo.email,
+        displayName: userInfo.name,
+        accessToken,
+        refreshToken: null,
+        tokenExpiresAt: expiresAt,
+        scopes: ['gmail.readonly', 'calendar.readonly'],
+      });
+      set({ connectedAccount: account });
+      toast().addToast('Google account connected', 'success');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      // 'access_denied' means the user closed the popup — no error toast needed
+      if (msg && msg !== 'access_denied') {
+        toast().addToast(`Failed to connect Google: ${msg}`, 'error');
+      }
+    } finally {
+      set({ loadingConnection: false });
+    }
   },
 
   disconnectGoogle: async () => {
@@ -89,30 +111,6 @@ export const useGoogleIntegrationStore = create<GoogleIntegrationState>()((set, 
     }
   },
 
-  handleOAuthCallback: async (code, state) => {
-    const uid = getUserId();
-    if (!uid) throw new Error('Not authenticated');
-
-    const tokens = await exchangeCodeForTokens(code, state);
-    const userInfo = await fetchGoogleUserInfo(tokens.access_token);
-
-    const expiresAt = tokens.expires_in
-      ? new Date(Date.now() + tokens.expires_in * 1000).toISOString()
-      : null;
-
-    const account = await connectedAccountsService.upsert(uid, {
-      provider: 'google',
-      providerAccountId: userInfo.sub,
-      email: userInfo.email,
-      displayName: userInfo.name,
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token ?? null,
-      tokenExpiresAt: expiresAt,
-      scopes: tokens.scope.split(' '),
-    });
-    set({ connectedAccount: account });
-  },
-
   getValidAccessToken: async (): Promise<string | null> => {
     const { connectedAccount } = get();
     if (!connectedAccount?.accessToken) return null;
@@ -123,24 +121,17 @@ export const useGoogleIntegrationStore = create<GoogleIntegrationState>()((set, 
       return connectedAccount.accessToken;
     }
 
-    if (!connectedAccount.refreshToken) return null;
-
+    // Token expired — try a silent re-auth (no popup if user is still signed in to Google)
     try {
-      const newTokens = await refreshAccessToken(connectedAccount.refreshToken);
-      const expiresAt = newTokens.expires_in
-        ? new Date(Date.now() + newTokens.expires_in * 1000).toISOString()
-        : null;
+      const { accessToken, expiresIn } = await requestGoogleToken('');
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
       await connectedAccountsService.updateTokens(connectedAccount.id, uid, {
-        accessToken: newTokens.access_token,
+        accessToken,
         tokenExpiresAt: expiresAt,
       });
-      const updated: ConnectedAccount = {
-        ...connectedAccount,
-        accessToken: newTokens.access_token,
-        tokenExpiresAt: expiresAt,
-      };
+      const updated: ConnectedAccount = { ...connectedAccount, accessToken, tokenExpiresAt: expiresAt };
       set({ connectedAccount: updated });
-      return newTokens.access_token;
+      return accessToken;
     } catch {
       toast().addToast('Google session expired — please reconnect', 'error');
       set({ connectedAccount: null });
@@ -168,14 +159,9 @@ export const useGoogleIntegrationStore = create<GoogleIntegrationState>()((set, 
     const uid = getUserId();
     if (!uid) return;
 
-    // First try cache
     const cached = await googleCalendarCacheService.fetchForRange(uid, startDate, endDate).catch(() => []);
+    if (cached.length > 0) set({ calendarEvents: cached });
 
-    if (cached.length > 0) {
-      set({ calendarEvents: cached });
-    }
-
-    // Refresh from API
     const accessToken = await get().getValidAccessToken();
     if (!accessToken) return;
 
@@ -189,8 +175,9 @@ export const useGoogleIntegrationStore = create<GoogleIntegrationState>()((set, 
       if (connectedAccount) {
         await connectedAccountsService.markLastSynced(connectedAccount.id, uid);
       }
-    } catch {
-      // Keep the cached data, don't show error for background sync
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : JSON.stringify(e);
+      toast().addToast(`Calendar sync failed: ${msg}`, 'error');
     } finally {
       set({ loadingCalendar: false });
     }

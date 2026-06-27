@@ -48,6 +48,18 @@ export const googleCalendarCacheService = {
   ): Promise<void> {
     if (events.length === 0) return;
 
+    // Delete existing rows for these event IDs before re-inserting (avoids partial-index ON CONFLICT issue)
+    const providerEventIds = events.map((e) => e.providerEventId).filter(Boolean);
+    if (providerEventIds.length > 0) {
+      const { error: delError } = await supabase
+        .from('calendar_events_cache')
+        .delete()
+        .eq('user_id', userId)
+        .eq('provider', 'google_calendar')
+        .in('provider_event_id', providerEventIds);
+      if (delError) throw delError;
+    }
+
     const rows = events.map((e) => ({
       user_id:              userId,
       provider:             'google_calendar',
@@ -69,7 +81,7 @@ export const googleCalendarCacheService = {
 
     const { error } = await supabase
       .from('calendar_events_cache')
-      .upsert(rows, { onConflict: 'user_id,provider,provider_event_id' });
+      .insert(rows);
     if (error) throw error;
   },
 
