@@ -34,6 +34,51 @@ export interface DbTask {
   recurrence_status: 'generated' | 'skipped' | 'moved' | 'completed' | null;
   created_at: string;
   updated_at: string;
+  // Google integrations (migration 006)
+  source_provider: string | null;
+  source_type: string | null;
+  source_external_id: string | null;
+  source_url: string | null;
+  source_title: string | null;
+  source_metadata: Record<string, unknown> | null;
+}
+
+export interface DbConnectedAccount {
+  id: string;
+  user_id: string;
+  provider: string;
+  provider_account_id: string;
+  email: string | null;
+  display_name: string | null;
+  access_token: string | null;
+  refresh_token: string | null;
+  token_expires_at: string | null;
+  scopes: string[] | null;
+  is_active: boolean;
+  last_synced_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DbCalendarEvent {
+  id: string;
+  user_id: string;
+  provider: string;
+  provider_event_id: string | null;
+  title: string;
+  description: string | null;
+  location: string | null;
+  start_time: string;
+  end_time: string;
+  is_all_day: boolean;
+  is_read_only: boolean;
+  source_calendar_name: string | null;
+  source_url: string | null;
+  calendar_id: string | null;
+  attendees: Array<{ email: string; displayName?: string; responseStatus?: string }> | null;
+  raw_metadata: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
 }
 
 // Legacy projects (renamed to _legacy_projects in migration 003)

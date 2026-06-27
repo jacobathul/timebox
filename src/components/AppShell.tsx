@@ -78,10 +78,11 @@ export function AppShell() {
                 <Route path="weekly-planning"   element={<WeeklyPlanningPage />} />
                 <Route path="plan"              element={<PlanMyDayFlow />} />
                 <Route path="review"            element={<EndOfDayReview />} />
-                <Route path="settings/account"  element={<AccountSettingsPage />} />
-                <Route path="settings/contexts" element={<AccountSettingsPage initialTab="contexts" />} />
+                <Route path="settings/account"       element={<AccountSettingsPage />} />
+                <Route path="settings/contexts"      element={<AccountSettingsPage initialTab="contexts" />} />
                 <Route path="settings/recurring-tasks" element={<AccountSettingsPage initialTab="recurring" />} />
-                <Route path="settings"          element={<Navigate to="account" replace />} />
+                <Route path="settings/integrations"  element={<AccountSettingsPage initialTab="integrations" />} />
+                <Route path="settings"               element={<Navigate to="account" replace />} />
                 <Route path="*"                 element={<Navigate to="today" replace />} />
               </Routes>
             </div>

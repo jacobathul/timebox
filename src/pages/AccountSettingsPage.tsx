@@ -1,25 +1,36 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, FolderTree, RefreshCw } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, User, FolderTree, RefreshCw, Plug } from 'lucide-react';
 import { AccountSettings } from '../components/settings/AccountSettings';
 import { ContextSettings } from '../components/contexts/ContextSettings';
 import { RecurringTasksSettingsPage } from './RecurringTasksSettingsPage';
+import { GoogleIntegrationSettings } from '../components/integrations/GoogleIntegrationSettings';
+import { GmailBrowser } from '../components/integrations/GmailBrowser';
 
-type Tab = 'account' | 'contexts' | 'recurring';
+type Tab = 'account' | 'contexts' | 'recurring' | 'integrations';
 
 interface Props {
   initialTab?: Tab;
 }
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: 'account',  label: 'Account',  icon: <User size={15} /> },
-  { id: 'contexts', label: 'Contexts', icon: <FolderTree size={15} /> },
-  { id: 'recurring', label: 'Recurring', icon: <RefreshCw size={15} /> },
+  { id: 'account',      label: 'Account',      icon: <User size={15} /> },
+  { id: 'contexts',     label: 'Contexts',     icon: <FolderTree size={15} /> },
+  { id: 'recurring',    label: 'Recurring',    icon: <RefreshCw size={15} /> },
+  { id: 'integrations', label: 'Integrations', icon: <Plug size={15} /> },
 ];
 
 export function AccountSettingsPage({ initialTab = 'account' }: Props) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as Tab | null;
+    if (tabParam && TABS.some((t) => t.id === tabParam)) {
+      setTab(tabParam);
+    }
+  }, [searchParams]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-50">
@@ -77,9 +88,15 @@ export function AccountSettingsPage({ initialTab = 'account' }: Props) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto pb-8 min-w-0">
-          {tab === 'account'  && <AccountSettings />}
-          {tab === 'contexts' && <ContextSettings />}
-          {tab === 'recurring' && <RecurringTasksSettingsPage />}
+          {tab === 'account'       && <AccountSettings />}
+          {tab === 'contexts'      && <ContextSettings />}
+          {tab === 'recurring'     && <RecurringTasksSettingsPage />}
+          {tab === 'integrations'  && (
+            <div className="space-y-8">
+              <GoogleIntegrationSettings />
+              <GmailBrowser />
+            </div>
+          )}
         </div>
       </div>
     </div>

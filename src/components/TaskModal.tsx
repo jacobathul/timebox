@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Clock, Calendar, Trash2, Timer } from 'lucide-react';
+import { X, Clock, Calendar, Trash2, Timer, Mail, ExternalLink, CalendarDays } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
@@ -328,6 +328,33 @@ export function TaskModal() {
                   </>
                 )}
               </div>
+            </div>
+          )}
+
+          {isEdit && taskModalInitial?.sourceProvider && (
+            <div className="border-t border-stone-100 pt-4">
+              <div className="flex items-center gap-2 mb-2">
+                {taskModalInitial.sourceProvider === 'gmail'
+                  ? <Mail size={13} className="text-stone-400" />
+                  : <CalendarDays size={13} className="text-stone-400" />}
+                <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+                  {taskModalInitial.sourceProvider === 'gmail' ? 'From Gmail' : 'From Google Calendar'}
+                </span>
+              </div>
+              {taskModalInitial.sourceTitle && (
+                <p className="text-xs text-stone-500 truncate">{taskModalInitial.sourceTitle}</p>
+              )}
+              {taskModalInitial.sourceUrl && (
+                <a
+                  href={taskModalInitial.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-accent-500 hover:text-accent-700 mt-1 transition-colors"
+                >
+                  <ExternalLink size={11} />
+                  {taskModalInitial.sourceProvider === 'gmail' ? 'Open in Gmail' : 'Open in Google Calendar'}
+                </a>
+              )}
             </div>
           )}
 

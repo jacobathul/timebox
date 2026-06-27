@@ -23,6 +23,8 @@ function makeDemoTasks(): Task[] {
     startTime: startTime ?? null, endTime: startTime ? addMinutes(startTime, mins) : null,
     completedAt: null, recurringTemplateId: null, recurrenceInstanceDate: null, recurrenceStatus: null,
     createdAt: now, updatedAt: now,
+    sourceProvider: null, sourceType: null, sourceExternalId: null,
+    sourceUrl: null, sourceTitle: null, sourceMetadata: null,
   });
   return [
     make('demo-1', 'Review pull request', 45, 'high', 'ctx-work', 'Review the auth refactor PR', '09:00'),
@@ -62,6 +64,12 @@ function buildTask(partial: Partial<Task>): Task {
     recurrenceStatus: partial.recurrenceStatus ?? null,
     createdAt: now,
     updatedAt: now,
+    sourceProvider: partial.sourceProvider ?? null,
+    sourceType: partial.sourceType ?? null,
+    sourceExternalId: partial.sourceExternalId ?? null,
+    sourceUrl: partial.sourceUrl ?? null,
+    sourceTitle: partial.sourceTitle ?? null,
+    sourceMetadata: partial.sourceMetadata ?? null,
   };
 }
 

@@ -10,6 +10,7 @@ import {
   FolderTree,
   FolderKanban,
   Search,
+  Plug,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
@@ -138,6 +139,15 @@ export function Sidebar() {
         >
           <FolderTree size={16} className={pathname === '/app/settings/recurring-tasks' ? 'text-accent-500' : 'text-stone-400'} />
           Recurring
+        </button>
+        <button
+          onClick={() => navigate('/app/settings/integrations')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+            pathname === '/app/settings/integrations' ? 'bg-accent-50 text-accent-700 font-medium' : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
+          }`}
+        >
+          <Plug size={16} className={pathname === '/app/settings/integrations' ? 'text-accent-500' : 'text-stone-400'} />
+          Integrations
         </button>
         {user && (
           <button
