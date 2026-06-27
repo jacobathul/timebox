@@ -11,6 +11,7 @@ import {
   FolderKanban,
   Search,
   Plug,
+  BarChart2,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
@@ -25,6 +26,7 @@ const NAV_ITEMS: { path: string; label: string; icon: React.ReactNode; shortcut?
   { path: '/app/today',    label: 'Today',       icon: <CalendarDays size={18} />, shortcut: 'D' },
   { path: '/app/projects', label: 'Projects',    icon: <FolderKanban size={18} />, shortcut: 'G' },
   { path: '/app/week',     label: 'Week',        icon: <LayoutGrid size={18} /> },
+  { path: '/app/analytics', label: 'Analytics',  icon: <BarChart2 size={18} /> },
   { path: '/app/plan',     label: 'Plan My Day', icon: <PlayCircle size={18} />,  shortcut: 'P' },
   { path: '/app/review',   label: 'End of Day',  icon: <Moon size={18} />,        shortcut: 'R' },
 ];

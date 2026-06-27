@@ -25,6 +25,7 @@ import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { AccountSettingsPage } from '../pages/AccountSettingsPage';
 import { ProjectsPage } from '../pages/ProjectsPage';
 import { ProjectDetailPage } from '../pages/ProjectDetailPage';
+import { AnalyticsPage } from '../pages/AnalyticsPage';
 
 export function AppShell() {
   const { user } = useAuthStore();
@@ -79,6 +80,7 @@ export function AppShell() {
                 <Route path="projects/:id"      element={<ProjectDetailPage />} />
                 <Route path="week"              element={<WeeklyView />} />
                 <Route path="weekly-planning"   element={<WeeklyPlanningPage />} />
+                <Route path="analytics"          element={<AnalyticsPage />} />
                 <Route path="plan"              element={<PlanMyDayFlow />} />
                 <Route path="review"            element={<EndOfDayReview />} />
                 <Route path="settings/account"       element={<AccountSettingsPage />} />
