@@ -2,9 +2,11 @@ import { Calendar, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import type { AppProjectWithStats } from '../../types';
 import { useContextStore } from '../../store/useContextStore';
+import { usePlanningWarningsStore } from '../../store/usePlanningWarningsStore';
 import { ProjectProgressBar } from './ProjectProgressBar';
 import { ProjectStatusBadge } from './ProjectStatusBadge';
 import { ProjectContextMenu } from './ProjectContextMenu';
+import { ProjectDeadlineRiskBadge } from '../planning/ProjectDeadlineRiskBadge';
 
 interface Props {
   project: AppProjectWithStats;
@@ -15,11 +17,17 @@ interface Props {
 export function ProjectCard({ project, onClick, selectedForWeek }: Props) {
   const contexts = useContextStore((s) => s.contexts);
   const context = project.context_id ? contexts.find((c) => c.id === project.context_id) : undefined;
+  const { warnings: allWarnings, dismissedWarningIds } = usePlanningWarningsStore();
 
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
 
   const accentColor = project.color ?? context?.color ?? '#6b7280';
   const isOverdue = project.due_date && project.status === 'active' && new Date(project.due_date) < new Date();
+
+  const dismissed = new Set(dismissedWarningIds);
+  const deadlineWarnings = allWarnings.filter(
+    (w) => w.projectId === project.id && w.type === 'project_deadline_capacity_risk' && !dismissed.has(w.id),
+  );
 
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
@@ -91,13 +99,20 @@ export function ProjectCard({ project, onClick, selectedForWeek }: Props) {
         </div>
 
         {/* Footer */}
-        {project.due_date && (
-          <div className={`flex items-center gap-1.5 text-xs ${isOverdue ? 'text-red-500' : 'text-stone-400'}`}>
-            <Calendar size={11} />
-            Due {new Date(project.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            {isOverdue && ' · Overdue'}
-          </div>
-        )}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          {project.due_date && (
+            <div className={`flex items-center gap-1.5 text-xs ${isOverdue ? 'text-red-500' : 'text-stone-400'}`}>
+              <Calendar size={11} />
+              Due {new Date(project.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {isOverdue && ' · Overdue'}
+            </div>
+          )}
+          {deadlineWarnings.length > 0 && (
+            <span onClick={(e) => e.stopPropagation()}>
+              <ProjectDeadlineRiskBadge warnings={deadlineWarnings} />
+            </span>
+          )}
+        </div>
       </div>
 
       {ctxMenu && (

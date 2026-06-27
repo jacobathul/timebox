@@ -208,6 +208,33 @@ export interface OverlapWarning {
   taskB: string;
 }
 
+export type PlanningWarningSeverity = 'info' | 'warning' | 'critical';
+
+export type PlanningWarningType =
+  | 'task_overlap'
+  | 'calendar_overlap'
+  | 'daily_capacity_exceeded'
+  | 'task_exceeds_remaining_capacity'
+  | 'project_deadline_capacity_risk'
+  | 'missing_estimate'
+  | 'outside_working_hours'
+  | 'overbooked_time_slot';
+
+export interface PlanningWarning {
+  id: string;
+  type: PlanningWarningType;
+  severity: PlanningWarningSeverity;
+  title: string;
+  message: string;
+  taskId?: string;
+  projectId?: string;
+  date?: string;
+  relatedEntityIds?: string[];
+  actionLabel?: string;
+  actionType?: string;
+  dismissible?: boolean;
+}
+
 // Used for drag-and-drop payload
 export interface DragData {
   type: 'task';

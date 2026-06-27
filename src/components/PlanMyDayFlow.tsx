@@ -5,7 +5,9 @@ import { useTaskStore } from '../store/useTaskStore';
 import { useProjectStore } from '../store/useProjectStore';
 import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { todayStr, formatDuration } from '../utils/time';
+import { DailyCapacityBar } from './planning/DailyCapacityBar';
 import { useEffect } from 'react';
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -23,6 +25,7 @@ export function PlanMyDayFlow() {
   const projects = useProjectStore((s) => s.projects);
   const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
   const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
+  const settings = useSettingsStore((s) => s.settings);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const today = todayStr();
@@ -293,9 +296,18 @@ export function PlanMyDayFlow() {
                   </div>
                 ))}
               </div>
-              <div className="mt-4 p-3 bg-accent-50 rounded-xl border border-accent-100">
+              <div className="mt-4 p-3 bg-accent-50 rounded-xl border border-accent-100 space-y-2">
                 <p className="text-sm text-accent-700 font-medium">Total: {formatDuration(totalSelectedMins)}</p>
-                {totalSelectedMins > 8 * 60 && <p className="text-xs text-amber-600 mt-1">That's over 8 hours — consider trimming your list.</p>}
+                <DailyCapacityBar
+                  plannedMinutes={totalSelectedMins}
+                  capacityMinutes={settings.defaultDailyCapacityMinutes}
+                />
+                {totalSelectedMins > settings.defaultDailyCapacityMinutes && (
+                  <p className="text-xs text-amber-600">That exceeds your daily capacity ({formatDuration(settings.defaultDailyCapacityMinutes)}) — consider trimming your list.</p>
+                )}
+                {totalSelectedMins <= settings.defaultDailyCapacityMinutes && totalSelectedMins > 8 * 60 && (
+                  <p className="text-xs text-amber-600">That's over 8 hours — consider trimming your list.</p>
+                )}
               </div>
             </div>
           )}

@@ -168,6 +168,13 @@ export interface DbUserSettings {
   default_day_start_time: string | null;
   default_day_end_time: string | null;
   theme: string | null;
+  default_daily_capacity_minutes: number | null;
+  workday_start_time: string | null;
+  workday_end_time: string | null;
+  working_days: number[] | null;
+  capacity_warning_enabled: boolean | null;
+  overlap_warning_enabled: boolean | null;
+  deadline_warning_enabled: boolean | null;
   created_at: string;
   updated_at: string;
 }

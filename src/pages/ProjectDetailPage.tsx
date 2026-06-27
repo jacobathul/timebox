@@ -5,11 +5,13 @@ import { useProjectStore, computeProjectStats } from '../store/useProjectStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { useContextStore } from '../store/useContextStore';
 import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
+import { usePlanningWarningsStore } from '../store/usePlanningWarningsStore';
 import { ProjectProgressBar } from '../components/projects/ProjectProgressBar';
 import { ProjectStatusBadge } from '../components/projects/ProjectStatusBadge';
 import { ProjectFormDialog } from '../components/projects/ProjectFormDialog';
 import { ProjectTaskList } from '../components/projects/ProjectTaskList';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { PlanningWarningBanner } from '../components/planning/PlanningWarningBanner';
 
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +32,16 @@ export function ProjectDetailPage() {
   const project = useMemo(() => projects.find((p) => p.id === id), [projects, id]);
   const stats = useMemo(() => project ? computeProjectStats(project, tasks) : undefined, [project, tasks]);
   const context = project?.context_id ? contexts.find((c) => c.id === project.context_id) : undefined;
+  const { warnings: allWarnings, dismissedWarningIds } = usePlanningWarningsStore();
+
+  const deadlineWarnings = project
+    ? allWarnings.filter(
+        (w) =>
+          w.projectId === project.id &&
+          w.type === 'project_deadline_capacity_risk' &&
+          !dismissedWarningIds.includes(w.id),
+      )
+    : [];
 
   if (!project || !stats) {
     return (
@@ -137,6 +149,13 @@ export function ProjectDetailPage() {
               <span>{stats.totalTasks} total</span>
             </div>
           </div>
+
+          {/* Deadline capacity warnings */}
+          {deadlineWarnings.length > 0 && (
+            <div className="mt-4">
+              <PlanningWarningBanner warnings={deadlineWarnings} />
+            </div>
+          )}
         </div>
       </div>
 

@@ -15,11 +15,15 @@ import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
 import { useGoogleIntegrationStore } from '../store/useGoogleIntegrationStore';
+import { useSettingsStore } from '../store/useSettingsStore';
+import { usePlanningWarningsStore } from '../store/usePlanningWarningsStore';
 import { TaskInbox } from './TaskInbox';
 import { ScheduledTaskBlock } from './ScheduledTaskBlock';
 import { ActualTimeBlock } from './ActualTimeBlock';
 import { GoogleCalendarEventBlock } from './integrations/GoogleCalendarEventBlock';
 import { TaskCard } from './TaskCard';
+import { PlanningWarningBanner } from './planning/PlanningWarningBanner';
+import { DailyCapacityBar } from './planning/DailyCapacityBar';
 import {
   getHourLabels,
   HOUR_HEIGHT_PX,
@@ -29,9 +33,11 @@ import {
   detectOverlaps,
   formatDateFull,
   todayStr,
+  timeToMinutes,
 } from '../utils/time';
 import type { Task, TaskTimeEntry } from '../types';
 import { WeeklyPlanCard } from './weekly-planning/WeeklyPlanningPage';
+import { useNavigate } from 'react-router-dom';
 
 const HOURS = getHourLabels();
 const CALENDAR_HEIGHT = HOUR_HEIGHT_PX * (DAY_END_HOUR - DAY_START_HOUR + 1);
@@ -77,6 +83,9 @@ export function DailyPlanner() {
   const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
   const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
   const { connectedAccount, calendarEvents, fetchCalendarEvents } = useGoogleIntegrationStore();
+  const settings = useSettingsStore((s) => s.settings);
+  const { warnings: allWarnings, recalculateWarnings, dismissedWarningIds } = usePlanningWarningsStore();
+  const navigate = useNavigate();
   const [dayEntries, setDayEntries] = useState<TaskTimeEntry[]>([]);
 
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -98,6 +107,11 @@ export function DailyPlanner() {
     }
   }, [selectedDate, connectedAccount, fetchCalendarEvents]);
 
+  // Recalculate warnings whenever tasks/date changes
+  useEffect(() => {
+    recalculateWarnings();
+  }, [tasks, selectedDate, calendarEvents, recalculateWarnings]);
+
   // Refresh actual blocks when running timer stops (entry gains an end time)
   useEffect(() => {
     if (!runningEntry) {
@@ -112,11 +126,21 @@ export function DailyPlanner() {
   const overlapIds = new Set(overlapWarnings.flatMap((w) => [w.taskA, w.taskB]));
   const totalMins = todayScheduled.reduce((acc, t) => {
     if (!t.startTime || !t.endTime) return acc;
-    const [sh, sm] = t.startTime.split(':').map(Number);
-    const [eh, em] = t.endTime.split(':').map(Number);
-    return acc + (eh * 60 + em) - (sh * 60 + sm);
+    return acc + timeToMinutes(t.endTime) - timeToMinutes(t.startTime);
   }, 0);
   const inboxCount = tasks.filter((t) => t.status === 'inbox').length;
+
+  // Warnings for today
+  const dismissed = new Set(dismissedWarningIds);
+  const dayWarnings = allWarnings.filter(
+    (w) => w.date === selectedDate && !dismissed.has(w.id),
+  );
+  const capacityWarnings = dayWarnings.filter(
+    (w) => w.type === 'daily_capacity_exceeded',
+  );
+  const otherDayWarnings = dayWarnings.filter(
+    (w) => w.type !== 'daily_capacity_exceeded',
+  );
 
   function getTimeAtY(clientY: number): string {
     const rect = calendarRef.current?.getBoundingClientRect();
@@ -218,9 +242,37 @@ export function DailyPlanner() {
 
       {currentWeeklyPlan && selectedDate === todayStr() && (
         <div className="px-4 md:px-6 py-3 bg-surface-50">
-          <WeeklyPlanCard plan={currentWeeklyPlan} today={selectedDate} todayLabel="Today’s weekly focus" />
+          <WeeklyPlanCard plan={currentWeeklyPlan} today={selectedDate} todayLabel="Today's weekly focus" />
           {weeklyPlanDay && weeklyPlanDay.focusTaskIds.length > 0 && (
-            <p className="mt-2 text-sm text-stone-500">Today’s planned focus: {weeklyPlanDay.focusTaskIds.length} task{weeklyPlanDay.focusTaskIds.length !== 1 ? 's' : ''}</p>
+            <p className="mt-2 text-sm text-stone-500">Today's planned focus: {weeklyPlanDay.focusTaskIds.length} task{weeklyPlanDay.focusTaskIds.length !== 1 ? 's' : ''}</p>
+          )}
+        </div>
+      )}
+
+      {/* Capacity bar + warnings for today */}
+      {(totalMins > 0 || otherDayWarnings.length > 0) && (
+        <div className="px-4 md:px-6 py-2.5 bg-white border-b border-stone-100 space-y-2">
+          {totalMins > 0 && (
+            <DailyCapacityBar
+              plannedMinutes={totalMins}
+              capacityMinutes={settings.defaultDailyCapacityMinutes}
+            />
+          )}
+          {otherDayWarnings.length > 0 && (
+            <PlanningWarningBanner
+              warnings={otherDayWarnings}
+              collapsible
+              onAction={(w) => {
+                if (w.actionType === 'open_settings') navigate('/app/settings/account?tab=planning');
+                else if (w.taskId) openTaskModal({ id: w.taskId });
+              }}
+            />
+          )}
+          {capacityWarnings.length > 0 && (
+            <PlanningWarningBanner
+              warnings={capacityWarnings}
+              onAction={() => navigate('/app/settings/account?tab=planning')}
+            />
           )}
         </div>
       )}

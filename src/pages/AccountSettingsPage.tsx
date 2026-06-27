@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, User, FolderTree, RefreshCw, Plug } from 'lucide-react';
+import { ArrowLeft, User, FolderTree, RefreshCw, Plug, Gauge } from 'lucide-react';
 import { AccountSettings } from '../components/settings/AccountSettings';
 import { ContextSettings } from '../components/contexts/ContextSettings';
 import { RecurringTasksSettingsPage } from './RecurringTasksSettingsPage';
 import { GoogleIntegrationSettings } from '../components/integrations/GoogleIntegrationSettings';
 import { GmailBrowser } from '../components/integrations/GmailBrowser';
+import { CapacitySettingsForm } from '../components/settings/CapacitySettingsForm';
 
-type Tab = 'account' | 'contexts' | 'recurring' | 'integrations';
+type Tab = 'account' | 'contexts' | 'recurring' | 'integrations' | 'planning';
 
 interface Props {
   initialTab?: Tab;
@@ -18,6 +19,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'contexts',     label: 'Contexts',     icon: <FolderTree size={15} /> },
   { id: 'recurring',    label: 'Recurring',    icon: <RefreshCw size={15} /> },
   { id: 'integrations', label: 'Integrations', icon: <Plug size={15} /> },
+  { id: 'planning',     label: 'Planning',     icon: <Gauge size={15} /> },
 ];
 
 export function AccountSettingsPage({ initialTab = 'account' }: Props) {
@@ -91,6 +93,7 @@ export function AccountSettingsPage({ initialTab = 'account' }: Props) {
           {tab === 'account'       && <AccountSettings />}
           {tab === 'contexts'      && <ContextSettings />}
           {tab === 'recurring'     && <RecurringTasksSettingsPage />}
+          {tab === 'planning'      && <CapacitySettingsForm />}
           {tab === 'integrations'  && (
             <div className="space-y-8">
               <GoogleIntegrationSettings />
