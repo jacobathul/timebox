@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, LayoutGrid, CheckCircle2, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutGrid, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { useTaskStore } from '../store/useTaskStore';
 import { useStore } from '../store/useStore';
 import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
+import { usePlanningWarningsStore } from '../store/usePlanningWarningsStore';
 import {
   todayStr,
   getWeekStart,
@@ -22,6 +23,7 @@ export function WeeklyView() {
   const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
   const { fetchWeeklyPlan } = useWeeklyPlanStore();
   const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
+  const { warnings: allWarnings, dismissedWarningIds, recalculateWarnings } = usePlanningWarningsStore();
   const navigate = useNavigate();
   const today = todayStr();
   const [weekStart, setWeekStart] = useState(() => getWeekStart(today));
@@ -29,9 +31,15 @@ export function WeeklyView() {
   const weekDays = getWeekDays(weekStart);
   const weekEnd = weekDays[6];
 
+  const dismissed = new Set(dismissedWarningIds);
+
   useEffect(() => {
     void ensureRecurringTasksGeneratedThrough(weekEnd);
   }, [weekEnd, ensureRecurringTasksGeneratedThrough]);
+
+  useEffect(() => {
+    recalculateWarnings();
+  }, [tasks, recalculateWarnings]);
 
   function goToDay(date: string) {
     setSelectedDate(date);
@@ -195,6 +203,9 @@ export function WeeklyView() {
             const completed = dayTasks.filter((t) => t.status === 'completed');
             const isToday = date === today;
             const isPast = date < today;
+            const dayWarn = allWarnings.filter((w) => w.date === date && !dismissed.has(w.id));
+            const hasCritical = dayWarn.some((w) => w.severity === 'critical');
+            const hasWarning = dayWarn.some((w) => w.severity === 'warning');
 
             return (
               <div
@@ -207,12 +218,22 @@ export function WeeklyView() {
                 onClick={() => goToDay(date)}
               >
                 <div className={`px-3 py-3 border-b ${isToday ? 'border-accent-200' : 'border-stone-100'}`}>
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isToday ? 'text-accent-500' : 'text-stone-400'}`}>
-                    {DAY_LABELS[idx]}
-                  </p>
-                  <p className={`text-lg font-semibold mt-0.5 ${isToday ? 'text-accent-700' : isPast ? 'text-stone-400' : 'text-stone-800'}`}>
-                    {new Date(date + 'T00:00:00').getDate()}
-                  </p>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className={`text-xs font-medium uppercase tracking-wide ${isToday ? 'text-accent-500' : 'text-stone-400'}`}>
+                        {DAY_LABELS[idx]}
+                      </p>
+                      <p className={`text-lg font-semibold mt-0.5 ${isToday ? 'text-accent-700' : isPast ? 'text-stone-400' : 'text-stone-800'}`}>
+                        {new Date(date + 'T00:00:00').getDate()}
+                      </p>
+                    </div>
+                    {(hasCritical || hasWarning) && (
+                      <AlertTriangle
+                        size={13}
+                        className={`mt-0.5 flex-shrink-0 ${hasCritical ? 'text-red-400' : 'text-amber-400'}`}
+                      />
+                    )}
+                  </div>
                   {dayTasks.length > 0 && (
                     <div className="flex items-center gap-1 mt-1">
                       <Clock size={10} className="text-stone-300" />

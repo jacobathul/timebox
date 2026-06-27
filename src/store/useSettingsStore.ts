@@ -6,12 +6,26 @@ export interface UserSettings {
   defaultDayStartTime: string;
   defaultDayEndTime: string;
   theme: 'light' | 'dark' | 'system';
+  defaultDailyCapacityMinutes: number;
+  workdayStartTime: string;
+  workdayEndTime: string;
+  workingDays: number[];
+  capacityWarningEnabled: boolean;
+  overlapWarningEnabled: boolean;
+  deadlineWarningEnabled: boolean;
 }
 
-const DEFAULTS: UserSettings = {
+export const SETTINGS_DEFAULTS: UserSettings = {
   defaultDayStartTime: '06:00',
   defaultDayEndTime: '23:00',
   theme: 'light',
+  defaultDailyCapacityMinutes: 300,
+  workdayStartTime: '09:00',
+  workdayEndTime: '17:00',
+  workingDays: [1, 2, 3, 4, 5],
+  capacityWarningEnabled: true,
+  overlapWarningEnabled: true,
+  deadlineWarningEnabled: true,
 };
 
 interface SettingsState {
@@ -23,7 +37,7 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
-  settings: DEFAULTS,
+  settings: SETTINGS_DEFAULTS,
   loading: false,
 
   fetchSettings: async () => {
@@ -32,7 +46,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ loading: true });
     try {
       const data = await settingsService.fetch(uid);
-      set({ settings: data ?? DEFAULTS });
+      set({ settings: data ?? SETTINGS_DEFAULTS });
     } catch { /* silent fallback to defaults */ }
     finally { set({ loading: false }); }
   },

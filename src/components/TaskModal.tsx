@@ -3,10 +3,12 @@ import { X, Clock, Calendar, Trash2, Timer, Mail, ExternalLink, CalendarDays } f
 import { useStore } from '../store/useStore';
 import { useTaskStore } from '../store/useTaskStore';
 import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
+import { usePlanningWarningsStore } from '../store/usePlanningWarningsStore';
 import { ContextSelector } from './contexts/ContextSelector';
 import { ProjectSelector } from './projects/ProjectSelector';
 import { TimekeeperButton } from './TimekeeperButton';
 import { TimeEntryList } from './TimeEntryList';
+import { PlanningWarningInline } from './planning/PlanningWarningInline';
 import { formatDuration } from '../utils/time';
 import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { dateOffsetStr, todayStr } from '../utils/time';
@@ -37,6 +39,7 @@ export function TaskModal() {
   } = useRecurringTaskStore();
 
   const { runningEntry } = useTimekeeperStore();
+  const { warnings: allWarnings, dismissedWarningIds } = usePlanningWarningsStore();
   const isEdit = !!taskModalInitial?.id;
   const [form, setForm] = useState<Partial<Task>>({});
   const [recurrence, setRecurrence] = useState<RecurrenceFormState>({
@@ -416,13 +419,28 @@ export function TaskModal() {
             </div>
           )}
 
+          {/* Task-level warnings (edit mode only) */}
+          {isEdit && taskModalInitial?.id && (() => {
+            const taskWarnings = allWarnings.filter(
+              (w) => (w.taskId === taskModalInitial.id || w.relatedEntityIds?.includes(taskModalInitial.id ?? '')) &&
+                !dismissedWarningIds.includes(w.id),
+            );
+            if (taskWarnings.length === 0) return null;
+            return (
+              <div className="space-y-1.5 border-t border-stone-100 pt-3">
+                {taskWarnings.map((w) => (
+                  <PlanningWarningInline key={w.id} warning={w} />
+                ))}
+              </div>
+            );
+          })()}
+
           <div className="flex items-center justify-between pt-2">
             {isEdit ? (
               <button type="button" onClick={handleDelete} className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-600 transition-colors min-h-[44px] px-1">
                 <Trash2 size={14} />Delete task
               </button>
-            ) : <div />}
-            <div className="flex gap-2">
+            ) : <div />}            <div className="flex gap-2">
               <button type="button" onClick={closeTaskModal} className="px-4 py-2 rounded-xl text-sm font-medium text-stone-500 hover:bg-stone-100 transition-colors min-h-[44px]">
                 Cancel
               </button>
