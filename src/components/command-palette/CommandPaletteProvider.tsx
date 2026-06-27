@@ -10,6 +10,7 @@ import {
   Square,
   Moon,
   Clock,
+  BarChart2,
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { useTaskStore } from '../../store/useTaskStore';
@@ -147,6 +148,15 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
         icon: <Moon size={16} />,
         group: 'Navigation',
         action: () => navigate('/app/review'),
+      },
+      {
+        id: 'nav-analytics',
+        type: 'command',
+        label: 'Go to Analytics',
+        keywords: ['analytics', 'time', 'stats', 'insights', 'tracking', 'dashboard', 'reports'],
+        icon: <BarChart2 size={16} />,
+        group: 'Navigation',
+        action: () => navigate('/app/analytics'),
       },
       {
         id: 'nav-settings',

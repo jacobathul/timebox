@@ -1,10 +1,11 @@
-import { X, Moon, FolderTree, Settings, LogOut, Search, CalendarDays } from 'lucide-react';
+import { X, Moon, FolderTree, Settings, LogOut, Search, CalendarDays, BarChart2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUiStore } from '../store/useUiStore';
 
 const DRAWER_ITEMS = [
   { path: '/app/weekly-planning',  label: 'Plan Week',   Icon: CalendarDays },
+  { path: '/app/analytics',        label: 'Analytics',   Icon: BarChart2 },
   { path: '/app/review',            label: 'End of Day', Icon: Moon },
   { path: '/app/settings/contexts', label: 'Contexts',   Icon: FolderTree },
   { path: '/app/settings/account',  label: 'Settings',   Icon: Settings },
