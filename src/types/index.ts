@@ -1,6 +1,8 @@
 export type Priority = 'low' | 'medium' | 'high';
 export type TaskStatus = 'inbox' | 'scheduled' | 'completed';
 export type AppView = 'daily' | 'weekly' | 'plan' | 'review';
+export type SourceProvider = 'gmail' | 'google_calendar';
+export type SourceType = 'email' | 'calendar_event';
 export type TimeEntryType = 'timer' | 'manual';
 export type RecurrenceFrequency = 'daily' | 'weekdays' | 'weekly' | 'monthly' | 'yearly' | 'custom' | 'none';
 export type RecurringTemplateStatus = 'active' | 'paused' | 'archived';
@@ -76,6 +78,51 @@ export interface Task {
   recurringTemplateId: string | null;
   recurrenceInstanceDate: string | null;
   recurrenceStatus: RecurrenceInstanceStatus | null;
+  createdAt: string;
+  updatedAt: string;
+  // Google integrations source metadata
+  sourceProvider: SourceProvider | null;
+  sourceType: SourceType | null;
+  sourceExternalId: string | null;
+  sourceUrl: string | null;
+  sourceTitle: string | null;
+  sourceMetadata: Record<string, unknown> | null;
+}
+
+export interface ConnectedAccount {
+  id: string;
+  userId: string;
+  provider: 'google';
+  providerAccountId: string;
+  email: string | null;
+  displayName: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  tokenExpiresAt: string | null;
+  scopes: string[];
+  isActive: boolean;
+  lastSyncedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoogleCalendarEvent {
+  id: string;
+  userId: string;
+  provider: 'google_calendar';
+  providerEventId: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  startTime: string;    // ISO timestamp
+  endTime: string;      // ISO timestamp
+  isAllDay: boolean;
+  isReadOnly: boolean;
+  sourceCalendarName: string | null;
+  sourceUrl: string | null;
+  calendarId: string | null;
+  attendees: Array<{ email: string; displayName?: string; responseStatus?: string }> | null;
+  rawMetadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 }

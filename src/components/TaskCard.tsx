@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Mail, Calendar } from 'lucide-react';
 import type { Task } from '../types';
 import { useTaskStore } from '../store/useTaskStore';
 import { useContextStore } from '../store/useContextStore';
@@ -97,6 +97,16 @@ export function TaskCard({ task, compact = false, draggable, dragHandleProps, st
               {task.title}
             </p>
             {task.recurringTemplateId && <RecurringTaskBadge />}
+            {task.sourceProvider === 'gmail' && (
+              <span className="flex items-center gap-0.5 text-xs text-stone-400 flex-shrink-0" title="Imported from Gmail">
+                <Mail size={10} />
+              </span>
+            )}
+            {task.sourceProvider === 'google_calendar' && (
+              <span className="flex items-center gap-0.5 text-xs text-stone-400 flex-shrink-0" title="Imported from Google Calendar">
+                <Calendar size={10} />
+              </span>
+            )}
           </div>
           {!compact && (
             <div className="flex items-center gap-2 mt-1 flex-wrap">

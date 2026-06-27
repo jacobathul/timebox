@@ -22,11 +22,17 @@ function dbToTask(db: DbTask): Task {
     recurrenceStatus: db.recurrence_status,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
+    sourceProvider: (db.source_provider as Task['sourceProvider']) ?? null,
+    sourceType: (db.source_type as Task['sourceType']) ?? null,
+    sourceExternalId: db.source_external_id ?? null,
+    sourceUrl: db.source_url ?? null,
+    sourceTitle: db.source_title ?? null,
+    sourceMetadata: db.source_metadata ?? null,
   };
 }
 
 function taskToInsert(task: Task, userId: string) {
-  const insert: Record<string, any> = {
+  const insert: Record<string, unknown> = {
     user_id: userId,
     title: task.title,
     notes: task.notes,
@@ -43,6 +49,12 @@ function taskToInsert(task: Task, userId: string) {
     recurring_template_id: task.recurringTemplateId,
     recurrence_instance_date: task.recurrenceInstanceDate,
     recurrence_status: task.recurrenceStatus,
+    source_provider: task.sourceProvider ?? null,
+    source_type: task.sourceType ?? null,
+    source_external_id: task.sourceExternalId ?? null,
+    source_url: task.sourceUrl ?? null,
+    source_title: task.sourceTitle ?? null,
+    source_metadata: task.sourceMetadata ?? null,
   };
 
   return insert;
@@ -99,6 +111,12 @@ export const taskService = {
     if (updates.recurringTemplateId !== undefined) patch.recurring_template_id = updates.recurringTemplateId;
     if (updates.recurrenceInstanceDate !== undefined) patch.recurrence_instance_date = updates.recurrenceInstanceDate;
     if (updates.recurrenceStatus !== undefined) patch.recurrence_status = updates.recurrenceStatus;
+    if (updates.sourceProvider !== undefined) patch.source_provider = updates.sourceProvider;
+    if (updates.sourceType !== undefined) patch.source_type = updates.sourceType;
+    if (updates.sourceExternalId !== undefined) patch.source_external_id = updates.sourceExternalId;
+    if (updates.sourceUrl !== undefined) patch.source_url = updates.sourceUrl;
+    if (updates.sourceTitle !== undefined) patch.source_title = updates.sourceTitle;
+    if (updates.sourceMetadata !== undefined) patch.source_metadata = updates.sourceMetadata;
 
     const { error } = await supabase
       .from('tasks')

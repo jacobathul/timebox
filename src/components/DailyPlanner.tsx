@@ -14,9 +14,11 @@ import { useStore } from '../store/useStore';
 import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { useRecurringTaskStore } from '../store/useRecurringTaskStore';
 import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
+import { useGoogleIntegrationStore } from '../store/useGoogleIntegrationStore';
 import { TaskInbox } from './TaskInbox';
 import { ScheduledTaskBlock } from './ScheduledTaskBlock';
 import { ActualTimeBlock } from './ActualTimeBlock';
+import { GoogleCalendarEventBlock } from './integrations/GoogleCalendarEventBlock';
 import { TaskCard } from './TaskCard';
 import {
   getHourLabels,
@@ -74,6 +76,7 @@ export function DailyPlanner() {
   const { fetchTimeEntriesForDate, runningEntry } = useTimekeeperStore();
   const { ensureRecurringTasksGeneratedThrough } = useRecurringTaskStore();
   const currentWeeklyPlan = useWeeklyPlanStore((s) => s.currentWeeklyPlan);
+  const { connectedAccount, calendarEvents, fetchCalendarEvents } = useGoogleIntegrationStore();
   const [dayEntries, setDayEntries] = useState<TaskTimeEntry[]>([]);
 
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -88,6 +91,12 @@ export function DailyPlanner() {
   useEffect(() => {
     void ensureRecurringTasksGeneratedThrough(selectedDate);
   }, [selectedDate, ensureRecurringTasksGeneratedThrough]);
+
+  useEffect(() => {
+    if (connectedAccount?.isActive) {
+      void fetchCalendarEvents(selectedDate, selectedDate);
+    }
+  }, [selectedDate, connectedAccount, fetchCalendarEvents]);
 
   // Refresh actual blocks when running timer stops (entry gains an end time)
   useEffect(() => {
@@ -237,6 +246,16 @@ export function DailyPlanner() {
             <CurrentTimeIndicator date={selectedDate} />
 
             <CalendarDropZone>
+              {/* Google Calendar read-only event blocks */}
+              {calendarEvents
+                .filter((e) => {
+                  const d = new Date(e.startTime);
+                  const eventDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                  return eventDate === selectedDate && !e.isAllDay;
+                })
+                .map((event) => (
+                  <GoogleCalendarEventBlock key={event.id || event.providerEventId} event={event} />
+                ))}
               {todayScheduled.map((task) => (
                 <div key={task.id} data-task-block>
                   <ScheduledTaskBlock task={task} hasOverlap={overlapIds.has(task.id)} onResizeStart={handleResizeStart} />

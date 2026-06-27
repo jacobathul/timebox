@@ -19,6 +19,7 @@ import { CommandPalette } from './command-palette/CommandPalette';
 import { collectMigratableTasks } from '../services/migration.service';
 import { useAuthStore } from '../store/useAuthStore';
 import { useWeeklyPlanStore } from '../store/useWeeklyPlanStore';
+import { useGoogleIntegrationStore } from '../store/useGoogleIntegrationStore';
 import { getWeekStart, todayStr } from '../utils/time';
 import { useTimekeeperStore } from '../store/useTimekeeperStore';
 import { AccountSettingsPage } from '../pages/AccountSettingsPage';
@@ -29,6 +30,7 @@ export function AppShell() {
   const { user } = useAuthStore();
   const { fetchRunningTimer } = useTimekeeperStore();
   const { fetchWeeklyPlan } = useWeeklyPlanStore();
+  const { fetchConnection } = useGoogleIntegrationStore();
   const [migrationTasks, setMigrationTasks] = useState<ReturnType<typeof collectMigratableTasks>>([]);
   const [migrationChecked, setMigrationChecked] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -37,8 +39,9 @@ export function AppShell() {
     if (user) {
       fetchRunningTimer();
       fetchWeeklyPlan(getWeekStart(todayStr()));
+      void fetchConnection();
     }
-  }, [user, fetchRunningTimer, fetchWeeklyPlan]);
+  }, [user, fetchRunningTimer, fetchWeeklyPlan, fetchConnection]);
 
   useEffect(() => {
     if (user && !migrationChecked) {
@@ -78,10 +81,11 @@ export function AppShell() {
                 <Route path="weekly-planning"   element={<WeeklyPlanningPage />} />
                 <Route path="plan"              element={<PlanMyDayFlow />} />
                 <Route path="review"            element={<EndOfDayReview />} />
-                <Route path="settings/account"  element={<AccountSettingsPage />} />
-                <Route path="settings/contexts" element={<AccountSettingsPage initialTab="contexts" />} />
+                <Route path="settings/account"       element={<AccountSettingsPage />} />
+                <Route path="settings/contexts"      element={<AccountSettingsPage initialTab="contexts" />} />
                 <Route path="settings/recurring-tasks" element={<AccountSettingsPage initialTab="recurring" />} />
-                <Route path="settings"          element={<Navigate to="account" replace />} />
+                <Route path="settings/integrations"  element={<AccountSettingsPage initialTab="integrations" />} />
+                <Route path="settings"               element={<Navigate to="account" replace />} />
                 <Route path="*"                 element={<Navigate to="today" replace />} />
               </Routes>
             </div>

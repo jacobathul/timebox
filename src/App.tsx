@@ -9,6 +9,7 @@ import { SignupPage } from './pages/SignupPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
+import { GoogleAuthCallbackPage } from './pages/GoogleAuthCallbackPage';
 import { useStore } from './store/useStore';
 
 function useKeyboardShortcuts() {
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
           <Route
             path="/app/*"
             element={
